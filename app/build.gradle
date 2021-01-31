@@ -1,0 +1,114 @@
+apply plugin: 'com.android.application'
+apply plugin: 'org.greenrobot.greendao' // apply plugin
+
+android {
+    compileSdkVersion 28
+
+    defaultConfig {
+        applicationId "com.botian.recognition"
+        minSdkVersion 19
+        targetSdkVersion 28
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        //
+        multiDexEnabled true//方法数超过63550使用
+
+        //use dialog
+        renderscriptTargetApi 17
+        renderscriptSupportModeEnabled true
+    }
+
+    signingConfigs {
+        debug {
+            storeFile file("../faceRecognition.jks")
+            storePassword '123456'
+            keyAlias 'faceRecognition'
+            keyPassword '123456'
+        }
+        release {
+            storeFile file("../faceRecognition.jks")
+            storePassword '123456'
+            keyAlias 'faceRecognition'
+            keyPassword '123456'
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug{
+            signingConfig signingConfigs.debug
+        }
+    }
+    compileOptions {
+        sourceCompatibility = 1.8
+        targetCompatibility = 1.8
+    }
+
+    greendao {
+        schemaVersion 1 //数据库版本号
+        // 设置DaoMaster、DaoSession、Dao 包名
+        daoPackage 'com.btface.greendaodemo'
+        targetGenDir 'src/main/java'
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.1'
+    implementation files('libs\\jwsapi.jar')
+    implementation files('libs\\YTCommon.jar')
+    implementation files('libs\\YTFaceFeature.jar')
+    implementation files('libs\\YTFaceLive3D.jar')
+    implementation files('libs\\YTFaceLiveColor.jar')
+    implementation files('libs\\YTFaceLiveIR.jar')
+    implementation files('libs\\YTFaceQuality.jar')
+    implementation files('libs\\YTFaceQualityPro.jar')
+    implementation files('libs\\YTFaceRetrieval.jar')
+    implementation files('libs\\YTFaceTracker.jar')
+    implementation files('libs\\YTUtils.jar')
+    implementation files('libs\\YTFaceAlignment.jar')
+    implementation project(path: ':lib-camera-android')
+    implementation project(path: ':lib-face')
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+
+    //android
+    implementation 'com.android.support:design:28.0.0'
+    implementation 'com.android.support:support-v13:28.0.0'
+    implementation 'com.android.support:appcompat-v7:28.0.0'
+    implementation 'com.android.support:cardview-v7:28.0.0'
+    
+    //依赖的jar包
+    implementation files('libs\\sun.misc.BASE64Decoder.jar')
+    
+    //第三方依赖
+    //butterknife
+    implementation 'com.jakewharton:butterknife:10.2.3'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:10.2.3'
+
+    //rxjava
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.8'
+    implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
+
+    // Okhttp库
+    implementation 'com.squareup.okhttp3:okhttp:3.8.1'
+    //gson
+    implementation 'com.google.code.gson:gson:2.2.4'
+    
+    //Android 6.0 权限适配
+    implementation 'com.github.tbruyelle:rxpermissions:0.10.2'
+
+    implementation 'com.github.CymChad:BaseRecyclerViewAdapterHelper:2.9.28'
+
+    implementation 'com.hjq:toast:8.0'
+    implementation 'com.kongzue.dialog_v3:dialog:3.2.4'
+    
+    //greendao
+    implementation 'org.greenrobot:greendao:3.3.0' // add library
+}

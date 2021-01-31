@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <!--<color name="colorAccent">#2384fe</color>-->
+    <color name="colorAccent">#00BFFF</color>
+    <!--<color name="colorAccent">#29B471</color>-->
+    <!--黑色-->
+    <color name="black">#000000</color>
+    <color name="vm_black_100">#ff212121</color>
+    <color name="vm_black_87">#dd212121</color>
+    <color name="vm_black_54">#89212121</color>
+    <color name="vm_black_38">#61212121</color>
+    <color name="vm_black_12">#1e212121</color>
+    <color name="tr_black">#cc000000</color>
+    <color name="lin_black">#1f1724</color>
+    <color name="trans_black">#99000000</color>
+
+    <!--导航-->
+    <color name="title_black">#2A2A2A</color>
+    <!--深黑字体色 2A2A2A-->
+    <color name="word_black">#2A2A2A</color>
+    <!--文字灰色-->
+    <color name="word_gray">#7A7A7A</color>
+
+    <color name="loadingText">#7000</color>
+
+    <!--白色-->
+    <color name="white">#FFFFFF</color>
+    <color name="white_00">#EFEFEF</color>
+    <color name="tran_white">#efFFFFFF</color>
+    <color name="white_fb">#FBFBFB</color>
+    <color name="white_tran">#99ffffff</color>
+
+    <!-- 灰色 -->
+    <color name="bg_Gray">#CCCCCC</color>
+    <!--灰色-->
+    <color name="gray_fe">#FEFEFE</color>
+    <color name="gray_ef">#EFEFEF</color>
+    <color name="gray_f4">#F4F4F4</color>
+    <color name="gray_5">#555555</color>
+    <color name="gray_6">#666666</color>
+    <color name="gray_8">#888888</color>
+    <color name="gray_65">#656565</color>
+    <color name="gray_66">#666666</color>
+    <color name="gray_99">#999999</color>
+    <color name="gray_10">#aaaaaa</color>
+    <color name="gray_11">#bbbbbb</color>
+    <color name="gray_12">#cccccc</color>
+    <color name="gray_ec">#ECECEC</color>
+    <color name="gray_ea">#EAEAEA</color>
+    <color name="gray_aa">#AAAAAA</color>
+    <color name="gray_cc">#CCCCCC</color>
+    <color name="gray_e">#EEEEEE</color>
+    <color name="gray_f8">#F8F8F8</color>
+
+
+    <!--蓝色-->
+    <color name="blue_100">#ff2384fe</color>
+    <color name="blue_87">#dd2384fe</color>
+    <color name="blue_54">#892384fe</color>
+    <color name="blue_38">#612384fe</color>
+    <color name="blue_12">#1e2384fe</color>
+    <color name="blue_icon">#00B0EA</color>
+    <color name="deepskyblue">#00BFFF</color>
+    <color name="vm_blue_38">#612384fe</color>
+    <color name="blue">#1966FF</color>
+    <color name="blue_10">#6687CEFA</color>
+    <!--蓝色-->
+    <color name="vm_blue_100">#ff2384fe</color>
+    <color name="vm_blue_87">#dd2384fe</color>
+    <color name="vm_blue_54">#892384fe</color>
+    <color name="vm_blue_12">#1e2384fe</color>
+    
+    <!-- 橙色 -->
+    <color name="orange">#FFA500</color>
+    <color name="orange_10">#FF9933</color>
+    <color name="yellow">#FFDE33</color>
+    <color name="yellow_40">#F6EFA6</color>
+    <color name="yellow_80">#E7B98D</color>
+    <color name="red_80">#D88273</color>
+    <color name="red_120">#CC6360</color>
+    <color name="red_160">#BF444C</color>
+    <color name="red_160_gray">#A0BF444C</color>
+    <color name="red_30">#CC0033</color>
+    <color name="purple_30">#660099</color>
+    <color name="brown_30">#7E0023</color>
+    <!--浅黄色-->
+    <color name="yello_20">#F4E1C0</color>
+    <color name="red">#FF0000</color>
+    <!--褐色-->
+    <color name="brown">#660066</color>
+    <color name="pink">#ee5e7b</color>
+    <!--绿色-->
+    <color name="green_100">#ff039e00</color>
+    <color name="green_25">#009966</color>
+
+    <!--时间选择器-->
+    <color name="text1">#59B29C</color>
+    <color name="text2">#333333</color>
+    <color name="background">#FFFFFF</color>
+
+
+    <color name="text_blue">#0076FF</color>
+    <color name="text_black">#333333</color>
+
+    <color name="transplant">#00ffffff</color>
+
+    <color name="darkgray">#404040ff</color>
+    <color name="green">#0ff0ff</color>
+    <color name="lightgray">#c0c0c0ff</color>
+    <color name="gray">#ff666666</color>
+    <color name="text_gray2">#ffC3C3C3</color>
+    <color name="magenta">#ff6699ff</color>
+    <color name="cyan">#66ffffff</color>
+    <color name="transparent">#00000000</color>
+    <color name="transparent_black">#ff000000</color>
+    <color name="background_dark">#f0f0f0</color>
+    <color name="camera_bg">#2c2c2c</color>
+    <color name="camera_progress">#2980B9</color>
+    <color name="camera_progress_split">#005084</color>
+    <color name="camera_progress_three">#24ff00</color>
+    <color name="camera_progress_overflow">#1b5d89</color>
+    <color name="camera_theme_selected_bgcolor">#2980B9</color>
+    <color name="camera_bottom_press_bg">#1b1c1f</color>
+    <color name="title_background_color">#fcb840</color>
+    <color name="camera_progress_delete">#f68b2b</color>
+    <color name="translucent_background_80">#CC000000</color>
+    <color name="translucent_background_50">#7f000000</color>
+    <color name="transparent_black_40">#66000000</color>
+    <color name="transparent_black_85">#DA000000</color>
+    <color name="transparent_black_30">#4D000000</color>
+
+    <color name="black2">#262F40</color>
+    <color name="black1">#7A7E83</color>
+    <!-- 透明 -->
+    <color name="transgray">#33555555</color>
+    <color name="transparent2">#50000000</color>
+    <!--窗体颜色 -->
+    <color name="windows_color">#F5F5F5</color>
+    <color name="greeny">#00CB0D</color>
+    <color name="bar_color">#232325</color>
+    <color name="float_button">#285082</color>
+
+
+    <!--录制视频SDK资源-->
+    <color name="color1">#fff</color>
+    <color name="color2">#f00</color>
+    <color name="color3">#FECD52</color>
+    <color name="color4">#145CB9</color>
+    <color name="color5">#21AE58</color>
+    <color name="video_gray">#aadddddd</color>
+    <color name="video_hint_color">#33000000</color>
+    <color name="hide_back">#80666666</color>
+</resources>

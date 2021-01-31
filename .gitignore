@@ -1,0 +1,20 @@
+*.iml
+.gradle
+/local.properties
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+
+# Project exclude paths
+/lib-camera-android/build/
+/lib-camera-android/build/intermediates/javac/debug/classes/
+/lib-face/build/
+/lib-face/build/intermediates/javac/debug/classes/
