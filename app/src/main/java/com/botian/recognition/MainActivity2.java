@@ -107,7 +107,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnClickList
     @Override
     protected void onResume() {
         super.onResume();
-        MyApplication.getJwsManager().jwsCloseLED();
+        //MyApplication.getJwsManager().jwsCloseLED();
     }
 
     @Override

@@ -62,12 +62,12 @@ public class RetrieveWithAndroidCameraActivity extends AppCompatActivity {
     private AbsActivityViewController mViewController;
     private TextView                  tv_changeCont;
     private boolean                   isSubmitting = false;
-    private List                      mCheckPersonList;
+    private List<String>              mOriCheckPersonNameList;//记录初始抓取到的人脸
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mCheckPersonList = new ArrayList();
+        mOriCheckPersonNameList = new ArrayList();
         AIThreadPool.instance().init(this);//重要!!
         // 恢复人脸库
         new AsyncJobBuilder(new StuffBox(), mRecoverFaceLibraryPipelineBuilder).synthesize(/*合成流水线任务*/).launch(/*执行任务*/);
@@ -102,14 +102,28 @@ public class RetrieveWithAndroidCameraActivity extends AppCompatActivity {
         mViewController = new ViewController(this);
         mViewController.setGetFaceListener(new AbsActivityViewController.GetFaceListener() {
             @Override
-            public void getFaceNum(int faceSize) {
+            public void getFaceNum(StuffBox stuffBox, Collection<YTFaceTracker.TrackedFace> allFaces, int faceSize) {
                 if (faceSize <= 0) {
                     AudioTimeUtil.getInstance().stopCountDown();
+                    mOriCheckPersonNameList.clear();
                     return;
                 }
                 if (!AudioTimeUtil.getInstance().isCountDown() && !isSubmitting) {
                     //倒计时3秒后，抓拍人脸
                     checkFaceWaiteForThreeSecond();
+                }
+            }
+
+            @Override
+            public void addCheckName(String personName) {
+                if (mOriCheckPersonNameList.size() == 0) {
+                    mOriCheckPersonNameList.add(personName);
+                } else {
+                    for (int i = 0; i < mOriCheckPersonNameList.size(); i++) {
+                        if (!mOriCheckPersonNameList.get(i).equals(personName)) {
+                            mOriCheckPersonNameList.add(personName);
+                        }
+                    }
                 }
             }
         });
@@ -215,17 +229,21 @@ public class RetrieveWithAndroidCameraActivity extends AppCompatActivity {
         JSONArray peoplelist = new JSONArray();
         for (YTFaceTracker.TrackedFace face : allFaces) {
             if (stuffBox.find(RetrievalStep.OUT_RETRIEVE_RESULTS).containsKey(face)) {
-                //sb.append("retrievalOK");
                 for (YTFaceRetrieval.RetrievedItem i : stuffBox.find(RetrievalStep.OUT_RETRIEVE_RESULTS).get(face)) {
-                    try {
-                        JSONObject jsonObject = new JSONObject();
-                        jsonObject.put("userid", "1001");
-                        jsonObject.put("username", i.featureId.split("\\.")[0]);
-                        jsonObject.put("type", getIntent().getIntExtra("checkType", 1));
-                        jsonObject.put("ftime", TimeUtil.getNowDateAndTimeStr());
-                        peoplelist.put(jsonObject);
-                    } catch (Exception e) {
-                        System.out.println(e);
+                    String userName = i.featureId.split("\\.")[0];
+                    for (String name : mOriCheckPersonNameList) {
+                        if (userName.equals(name)) {
+                            try {
+                                JSONObject jsonObject = new JSONObject();
+                                jsonObject.put("userid", "1001");
+                                jsonObject.put("username", userName);
+                                jsonObject.put("type", getIntent().getIntExtra("checkType", 1));
+                                jsonObject.put("ftime", TimeUtil.getNowDateAndTimeStr());
+                                peoplelist.put(jsonObject);
+                            } catch (Exception e) {
+                                System.out.println(e);
+                            }
+                        }
                     }
                 }
             }
@@ -245,12 +263,14 @@ public class RetrieveWithAndroidCameraActivity extends AppCompatActivity {
                 ProgressDialogUtil.hideDialog();
                 ToastUtils.showToast("网络连接错误，打卡记录提交失败！");
                 isSubmitting = false;
+                mOriCheckPersonNameList.clear();
             }
 
             @Override
             public void onSuccess(int code, String resbody) {
                 ProgressDialogUtil.hideDialog();
                 isSubmitting = false;
+                mOriCheckPersonNameList.clear();
                 if (code != 200) {
                     ToastUtils.showToast("网络请求错误，打卡记录提交失败！");
                     return;

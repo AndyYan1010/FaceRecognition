@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
-import com.android.jws.JwsManager;
 import com.botian.recognition.BaseActivity;
 import com.botian.recognition.R;
 import com.botian.recognition.utils.ToastUtils;
@@ -21,7 +20,6 @@ public class DeviceActivity extends BaseActivity implements View.OnClickListener
     @BindView(R.id.tv_close)
     TextView tv_close;
 
-    private JwsManager jwsManager;
 
     @Override
     protected int setLayout() {
@@ -35,8 +33,6 @@ public class DeviceActivity extends BaseActivity implements View.OnClickListener
 
     @Override
     protected void initData() {
-        jwsManager = JwsManager.create(this);
-        
         //获取SensorManager对象  
         SensorManager sm = (SensorManager) getSystemService(SENSOR_SERVICE);
         sm.registerListener(new SensorEventListener() {
@@ -78,11 +74,9 @@ public class DeviceActivity extends BaseActivity implements View.OnClickListener
 
     /****关灯*/
     private void closeLight() {
-        jwsManager.jwsCloseLED();
     }
 
     /***打开灯*/
     private void openLight() {
-        jwsManager.jwsOpenLED();
     }
 }

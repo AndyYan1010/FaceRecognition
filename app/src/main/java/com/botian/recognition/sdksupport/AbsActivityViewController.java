@@ -20,7 +20,6 @@ import android.widget.RadioGroup;
 import android.widget.RadioGroup.OnCheckedChangeListener;
 import android.widget.TextView;
 
-import com.botian.recognition.MyApplication;
 import com.botian.recognition.R;
 import com.tencent.cloud.ai.fr.camera.Frame;
 import com.tencent.cloud.ai.fr.utils.ImageConverter;
@@ -201,7 +200,7 @@ public abstract class AbsActivityViewController {
         final String ms = "检测到人脸数量: " + allFaces.size();
         //检测到人脸就倒计时
         if (null != mGetFaceListener)
-            mGetFaceListener.getFaceNum(allFaces.size());
+            mGetFaceListener.getFaceNum(stuffBox, allFaces, allFaces.size());
         mFindFaceText.post(new Runnable() {
             @Override
             public void run() {
@@ -386,7 +385,9 @@ public abstract class AbsActivityViewController {
                 for (RetrievedItem i : stuffBox.find(RetrievalStep.OUT_RETRIEVE_RESULTS).get(face)) {
                     sb.append("\n");
                     sb.append(String.format("%s, sco=%.1f,sim=%.3f", i.featureId, i.score, i.sim));
-                    MyApplication.tempUserName = i.featureId.split("\\.")[0];
+                    String tempUserName = i.featureId.split("\\.")[0];
+                    if (null != mGetFaceListener)
+                        mGetFaceListener.addCheckName(tempUserName);
                 }
                 faceResult.retrieval       = sb.toString();
                 faceResult.retrieval_color = Color.GREEN;
@@ -494,6 +495,8 @@ public abstract class AbsActivityViewController {
     }
 
     public interface GetFaceListener {
-        void getFaceNum(int faceSize);
+        void getFaceNum(StuffBox stuffBox, Collection<TrackedFace> allFaces, int faceSize);
+
+        void addCheckName(String personName);
     }
 }
