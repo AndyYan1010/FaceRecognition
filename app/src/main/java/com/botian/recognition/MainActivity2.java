@@ -141,14 +141,14 @@ public class MainActivity2 extends AppCompatActivity implements View.OnClickList
     private void setInfra_redWithLED() {
         mMyInfraredReceiver = new MyInfraredReceiver();
         IntentFilter intentFilter = new IntentFilter(JwsIntents.REQUEST_RESPONSE_IR_STATE_ACTION);
-        MyApplication.getJwsManager().jwsRegisterIRListener();
+        //MyApplication.getJwsManager().jwsRegisterIRListener();
         registerReceiver(mMyInfraredReceiver, intentFilter);
     }
 
     /***关闭红外*/
     public void closeInfraredAndLED() {
         if (mMyInfraredReceiver != null) {
-            MyApplication.getJwsManager().jwsUnregisterIRListener();
+            //MyApplication.getJwsManager().jwsUnregisterIRListener();
             unregisterReceiver(mMyInfraredReceiver);
             mMyInfraredReceiver = null;
         }
