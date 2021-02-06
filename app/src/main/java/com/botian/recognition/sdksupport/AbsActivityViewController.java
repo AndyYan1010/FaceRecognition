@@ -199,30 +199,6 @@ public abstract class AbsActivityViewController {
             allFacesCopy.remove(face);
         }
         for (TrackedFace face : allFacesCopy) {
-            //if (null != mOriCheckPersonNameList) {
-            //    if (stuffBox.find(RetrievalStep.OUT_RETRIEVE_RESULTS).containsKey(face)) {
-            //        StringBuilder sb = new StringBuilder();
-            //        sb.append("retrievalOK");
-            //        for (YTFaceRetrieval.RetrievedItem i : stuffBox.find(RetrievalStep.OUT_RETRIEVE_RESULTS).get(face)) {
-            //            sb.append("\n");
-            //            sb.append(String.format("%s, sco=%.1f,sim=%.3f", i.featureId, i.score, i.sim));
-            //            String tempUserName = i.featureId.split("\\.")[0];
-            //            if (mOriCheckPersonNameList.size() == 0) {
-            //                drawableFaces.add(new FaceDrawView.DrawableFace(face.faceRect, face.xy5Points, faceToString(face, ""), Color.GRAY));
-            //            } else {
-            //                for (String name : mOriCheckPersonNameList) {
-            //                    if (tempUserName.equals(name)) {
-            //                        drawableFaces.add(new FaceDrawView.DrawableFace(face.faceRect, face.xy5Points, faceToString(face, ""), Color.GRAY));
-            //                        lightNextSyep(stuffBox, allFaces, drawableFaces);
-            //                    }
-            //                }
-            //            }
-            //        }
-            //    }
-            //} else {
-            //    drawableFaces.add(new FaceDrawView.DrawableFace(face.faceRect, face.xy5Points, faceToString(face, ""), Color.GRAY));
-            //    lightNextSyep(stuffBox, allFaces, drawableFaces);
-            //}
             drawableFaces.add(new FaceDrawView.DrawableFace(face.faceRect, face.xy5Points, faceToString(face, ""), Color.GRAY));
         }
         lightNextSyep(stuffBox, allFaces, drawableFaces);
@@ -272,48 +248,6 @@ public abstract class AbsActivityViewController {
             // 如果没有红外帧，仍需要调用一下该函数，否则若上一帧包含红外帧，人脸框不会消失
             onDrawIrFaces(new ArrayList<FaceDrawView.DrawableFace>(), 10, 10);
         }
-    }
-
-    protected abstract void onDrawColorFaces(Collection<FaceDrawView.DrawableFace> drawableFaces, int frameWidth, int frameHeight);
-
-    protected abstract void onDrawIrFaces(Collection<FaceDrawView.DrawableFace> drawableFaces, int frameWidth, int frameHeight);
-
-    protected abstract void onDrawDepthFaces(Collection<FaceDrawView.DrawableFace> drawableFaces, int frameWidth, int frameHeight);
-
-    /**
-     * TODO 性能优化
-     */
-    private static String faceToString(TrackedFace face, String extraMsg) {
-        final StringBuffer sb = new StringBuffer();
-        sb.append("traceId=").append(face.traceId).append("\n");
-        sb.append("frameId=").append(face.frameId).append("\n");
-        sb.append("consecutive=").append(face.consecutive).append("\n");
-        sb.append("pitch=").append(String.format("%.2f", face.pitch)).append("\n");
-        sb.append("yaw=").append(String.format("%.2f", face.yaw)).append("\n");
-        sb.append("roll=").append(String.format("%.2f", face.roll)).append("\n");
-        sb.append(extraMsg);
-        return sb.toString();
-    }
-
-    private static float[] mergeFloats(float[]... arrays) {
-        int finalLength = 0;
-        for (float[] array : arrays) {
-            finalLength += array.length;
-        }
-
-        float[] dest    = null;
-        int     destPos = 0;
-
-        for (float[] array : arrays) {
-            if (dest == null) {
-                dest    = Arrays.copyOf(array, finalLength);
-                destPos = array.length;
-            } else {
-                System.arraycopy(array, 0, dest, destPos, array.length);
-                destPos += array.length;
-            }
-        }
-        return dest;
     }
 
     public void drawHeavyThreadStuff(StuffBox stuffBox) {
@@ -418,6 +352,48 @@ public abstract class AbsActivityViewController {
                 }
             }
         });
+    }
+
+    protected abstract void onDrawColorFaces(Collection<FaceDrawView.DrawableFace> drawableFaces, int frameWidth, int frameHeight);
+
+    protected abstract void onDrawIrFaces(Collection<FaceDrawView.DrawableFace> drawableFaces, int frameWidth, int frameHeight);
+
+    protected abstract void onDrawDepthFaces(Collection<FaceDrawView.DrawableFace> drawableFaces, int frameWidth, int frameHeight);
+
+    /**
+     * TODO 性能优化
+     */
+    private static String faceToString(TrackedFace face, String extraMsg) {
+        final StringBuffer sb = new StringBuffer();
+        sb.append("traceId=").append(face.traceId).append("\n");
+        sb.append("frameId=").append(face.frameId).append("\n");
+        sb.append("consecutive=").append(face.consecutive).append("\n");
+        sb.append("pitch=").append(String.format("%.2f", face.pitch)).append("\n");
+        sb.append("yaw=").append(String.format("%.2f", face.yaw)).append("\n");
+        sb.append("roll=").append(String.format("%.2f", face.roll)).append("\n");
+        sb.append(extraMsg);
+        return sb.toString();
+    }
+
+    private static float[] mergeFloats(float[]... arrays) {
+        int finalLength = 0;
+        for (float[] array : arrays) {
+            finalLength += array.length;
+        }
+
+        float[] dest    = null;
+        int     destPos = 0;
+
+        for (float[] array : arrays) {
+            if (dest == null) {
+                dest    = Arrays.copyOf(array, finalLength);
+                destPos = array.length;
+            } else {
+                System.arraycopy(array, 0, dest, destPos, array.length);
+                destPos += array.length;
+            }
+        }
+        return dest;
     }
 
     private void hevynextDraw(StuffBox stuffBox, Frame colorFrame, float[] allPoints, Paint paint, TrackedFace face, FaceResult faceResult) {
