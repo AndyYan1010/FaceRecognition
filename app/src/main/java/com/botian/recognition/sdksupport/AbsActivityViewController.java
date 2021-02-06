@@ -23,8 +23,8 @@ import android.widget.TextView;
 import com.botian.recognition.R;
 import com.tencent.cloud.ai.fr.camera.Frame;
 import com.tencent.cloud.ai.fr.utils.ImageConverter;
-import com.tencent.youtu.YTFaceAlignment.FaceShape;
-import com.tencent.youtu.YTFaceRetrieval.RetrievedItem;
+import com.tencent.youtu.YTFaceAlignment;
+import com.tencent.youtu.YTFaceRetrieval;
 import com.tencent.youtu.YTFaceTracker.TrackedFace;
 import com.tencent.youtu.YTImage;
 import com.tencent.youtu.YTUtils;
@@ -144,6 +144,12 @@ public abstract class AbsActivityViewController {
         return mRootView;
     }
 
+    private List<String> mOriCheckPersonNameList;
+
+    public void setOriPersonList(List<String> oriCheckPersonNameList) {
+        mOriCheckPersonNameList = oriCheckPersonNameList;
+    }
+
     /**
      * 设置某个单选按钮的选中状态, 注意: 仅修改UI状态, 不触发业务逻辑
      *
@@ -193,9 +199,36 @@ public abstract class AbsActivityViewController {
             allFacesCopy.remove(face);
         }
         for (TrackedFace face : allFacesCopy) {
+            //if (null != mOriCheckPersonNameList) {
+            //    if (stuffBox.find(RetrievalStep.OUT_RETRIEVE_RESULTS).containsKey(face)) {
+            //        StringBuilder sb = new StringBuilder();
+            //        sb.append("retrievalOK");
+            //        for (YTFaceRetrieval.RetrievedItem i : stuffBox.find(RetrievalStep.OUT_RETRIEVE_RESULTS).get(face)) {
+            //            sb.append("\n");
+            //            sb.append(String.format("%s, sco=%.1f,sim=%.3f", i.featureId, i.score, i.sim));
+            //            String tempUserName = i.featureId.split("\\.")[0];
+            //            if (mOriCheckPersonNameList.size() == 0) {
+            //                drawableFaces.add(new FaceDrawView.DrawableFace(face.faceRect, face.xy5Points, faceToString(face, ""), Color.GRAY));
+            //            } else {
+            //                for (String name : mOriCheckPersonNameList) {
+            //                    if (tempUserName.equals(name)) {
+            //                        drawableFaces.add(new FaceDrawView.DrawableFace(face.faceRect, face.xy5Points, faceToString(face, ""), Color.GRAY));
+            //                        lightNextSyep(stuffBox, allFaces, drawableFaces);
+            //                    }
+            //                }
+            //            }
+            //        }
+            //    }
+            //} else {
+            //    drawableFaces.add(new FaceDrawView.DrawableFace(face.faceRect, face.xy5Points, faceToString(face, ""), Color.GRAY));
+            //    lightNextSyep(stuffBox, allFaces, drawableFaces);
+            //}
             drawableFaces.add(new FaceDrawView.DrawableFace(face.faceRect, face.xy5Points, faceToString(face, ""), Color.GRAY));
         }
+        lightNextSyep(stuffBox, allFaces, drawableFaces);
+    }
 
+    private void lightNextSyep(StuffBox stuffBox, Collection<TrackedFace> allFaces, List<FaceDrawView.DrawableFace> drawableFaces) {
         //有些机器上, 绘制人脸框的 SurfaceView 可能有兼容性问题, 所以这里也用文字显示一下, 方便排查
         final String ms = "检测到人脸数量: " + allFaces.size();
         //检测到人脸就倒计时
@@ -295,113 +328,37 @@ public abstract class AbsActivityViewController {
         // UI 数据
         Collection<TrackedFace> colorFaces  = stuffBox.find(TrackStep.OUT_COLOR_FACE);
         final List<FaceResult>  faceResults = new ArrayList<>(colorFaces.size());
+
         // 每个人脸详细结果
         for (TrackedFace face : colorFaces) {
             FaceResult faceResult = new FaceResult();
-            faceResults.add(faceResult);
-            // 裁出人脸小图
-            YTImage ytImage    = YTUtils.cropRGB888(colorFrame.data, colorFrame.width, colorFrame.height, face.faceRect);
-            Bitmap  faceBitmap = ImageConverter.rgbToBitmap(ytImage.data, ytImage.width, ytImage.height);
-            // 在人脸小图上绘制90个点
-            FaceShape faceShape = stuffBox.find(AlignmentStep.OUT_FACE_SHAPE).get(face);
-            if (faceShape != null && faceBitmap != null) {
-                allPoints = mergeFloats(
-                        faceShape.faceProfile,
-                        faceShape.leftEyebrow,
-                        faceShape.rightEyebrow,
-                        faceShape.leftEye,
-                        faceShape.rightEye,
-                        faceShape.nose,
-                        faceShape.mouth,
-                        faceShape.pupil
-                );
-                float[] mappedPoints = new float[allPoints.length];
-                Matrix  matrix       = new Matrix();
-                matrix.postTranslate(-face.faceRect.left, -face.faceRect.top);//90个点本来是以帧左上角为原点的, 这里改成以人脸抠图左上角为原点
-                matrix.mapPoints(mappedPoints, allPoints);
-                Canvas canvas = new Canvas(faceBitmap);
-                canvas.drawPoints(mappedPoints, paint);
-            }
-            faceResult.face = faceBitmap;
-            //设置数据字段
-            if (stuffBox.find(AlignmentStep.OUT_ALIGNMENT_OK_FACES).contains(face)) {
-                faceResult.alignment       = "alignmentOk";
-                faceResult.alignment_color = Color.GREEN;
-            } else if (stuffBox.find(AlignmentStep.OUT_ALIGNMENT_FAILED_FACES).containsKey(face)) {
-                faceResult.alignment       = "alignmentFail, " + stuffBox.find(AlignmentStep.OUT_ALIGNMENT_FAILED_FACES).get(face);
-                faceResult.alignment_color = Color.RED;
-            } else {
-                faceResult.alignment       = "alignment NONE";
-                faceResult.alignment_color = Color.GRAY;
-            }
 
-            if (stuffBox.find(QualityProStep.OUT_QUALITY_PRO_OK).contains(face)) {
-                faceResult.quality_pro       = "qualityProOk";
-                faceResult.quality_pro_color = Color.GREEN;
-            } else if (stuffBox.find(QualityProStep.OUT_QUALITY_PRO_FAILED).containsKey(face)) {
-                faceResult.quality_pro       = "qualityProFail, " + stuffBox.find(QualityProStep.OUT_QUALITY_PRO_FAILED).get(face);
-                faceResult.quality_pro_color = Color.RED;
-            } else {
-                faceResult.quality_pro       = "qualityPro NONE";
-                faceResult.quality_pro_color = Color.GRAY;
-            }
-
-            if (stuffBox.find(ColorLiveTaskStep.OUT_COLOR_LIVE_OK_SCORE).containsKey(face)) {
-                faceResult.color_live       = "colorLiveOk";
-                faceResult.color_live_color = Color.GREEN;
-            } else if (stuffBox.find(ColorLiveTaskStep.OUT_COLOR_LIVE_FAILED).containsKey(face)) {
-                faceResult.color_live       = "colorLiveFail, " + String.format("%.4f", stuffBox.find(ColorLiveTaskStep.OUT_COLOR_LIVE_FAILED).get(face));
-                faceResult.color_live_color = Color.RED;
-            } else {
-                faceResult.color_live       = "colorLive NONE";
-                faceResult.color_live_color = Color.GRAY;
-            }
-
-            if (stuffBox.find(IrLiveStep.OUT_IR_LIVE_OK).contains(face)) {
-                faceResult.ir_live       = "irLiveOk";
-                faceResult.ir_live_color = Color.GREEN;
-            } else if (stuffBox.find(IrLiveStep.OUT_IR_LIVE_FAILED).contains(face)) {
-                faceResult.ir_live       = "irLiveFail";
-                faceResult.ir_live_color = Color.RED;
-            } else {
-                faceResult.ir_live       = "irLive NONE";
-                faceResult.ir_live_color = Color.GRAY;
-            }
-
-            if (stuffBox.find(DepthLiveStep.OUT_DEPTH_LIVE_OK).contains(face)) {
-                faceResult.depth_live       = "depthLiveOk";
-                faceResult.depth_live_color = Color.GREEN;
-            } else if (stuffBox.find(DepthLiveStep.OUT_DEPTH_LIVE_FAILED).contains(face)) {
-                faceResult.depth_live       = "depthLiveFail";
-                faceResult.depth_live_color = Color.RED;
-            } else {
-                faceResult.depth_live       = "depthLive NONE";
-                faceResult.depth_live_color = Color.GRAY;
-            }
-
-            if (stuffBox.find(RetrievalStep.OUT_RETRIEVE_RESULTS).containsKey(face)) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("retrievalOK");
-                for (RetrievedItem i : stuffBox.find(RetrievalStep.OUT_RETRIEVE_RESULTS).get(face)) {
-                    sb.append("\n");
-                    sb.append(String.format("%s, sco=%.1f,sim=%.3f", i.featureId, i.score, i.sim));
-                    String tempUserName = i.featureId.split("\\.")[0];
-                    if (null != mGetFaceListener)
-                        mGetFaceListener.addCheckName(tempUserName);
+            if (null != mOriCheckPersonNameList) {
+                if (stuffBox.find(RetrievalStep.OUT_RETRIEVE_RESULTS).containsKey(face)) {
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("retrievalOK");
+                    for (YTFaceRetrieval.RetrievedItem i : stuffBox.find(RetrievalStep.OUT_RETRIEVE_RESULTS).get(face)) {
+                        sb.append("\n");
+                        sb.append(String.format("%s, sco=%.1f,sim=%.3f", i.featureId, i.score, i.sim));
+                        String tempUserName = i.featureId.split("\\.")[0];
+                        if (mOriCheckPersonNameList.size() == 0) {
+                            faceResults.add(faceResult);//UI绘制
+                            //next step
+                            hevynextDraw(stuffBox, colorFrame, allPoints, paint, face, faceResult);
+                        } else {
+                            for (String name : mOriCheckPersonNameList) {
+                                if (tempUserName.equals(name)) {
+                                    faceResults.add(faceResult);//UI绘制
+                                    //next step
+                                    hevynextDraw(stuffBox, colorFrame, allPoints, paint, face, faceResult);
+                                }
+                            }
+                        }
+                    }
                 }
-                faceResult.retrieval       = sb.toString();
-                faceResult.retrieval_color = Color.GREEN;
             } else {
-                faceResult.retrieval       = "retrieval NONE";
-                faceResult.retrieval_color = Color.GRAY;
-            }
-
-            if (stuffBox.find(CompareStep.OUT_COMPARE_SCORE).containsKey(face)) {
-                faceResult.compare       = "compare sco=" + stuffBox.find(CompareStep.OUT_COMPARE_SCORE).get(face);
-                faceResult.compare_color = Color.GREEN;
-            } else {
-                faceResult.compare       = "compare NONE";
-                faceResult.compare_color = Color.GRAY;
+                faceResults.add(faceResult);
+                hevynextDraw(stuffBox, colorFrame, allPoints, paint, face, faceResult);
             }
         }
 
@@ -461,6 +418,113 @@ public abstract class AbsActivityViewController {
                 }
             }
         });
+    }
+
+    private void hevynextDraw(StuffBox stuffBox, Frame colorFrame, float[] allPoints, Paint paint, TrackedFace face, FaceResult faceResult) {
+        // 裁出人脸小图
+        YTImage ytImage    = YTUtils.cropRGB888(colorFrame.data, colorFrame.width, colorFrame.height, face.faceRect);
+        Bitmap  faceBitmap = ImageConverter.rgbToBitmap(ytImage.data, ytImage.width, ytImage.height);
+        // 在人脸小图上绘制90个点
+        YTFaceAlignment.FaceShape faceShape = stuffBox.find(AlignmentStep.OUT_FACE_SHAPE).get(face);
+        if (faceShape != null && faceBitmap != null) {
+            allPoints = mergeFloats(
+                    faceShape.faceProfile,
+                    faceShape.leftEyebrow,
+                    faceShape.rightEyebrow,
+                    faceShape.leftEye,
+                    faceShape.rightEye,
+                    faceShape.nose,
+                    faceShape.mouth,
+                    faceShape.pupil
+            );
+            float[] mappedPoints = new float[allPoints.length];
+            Matrix  matrix       = new Matrix();
+            matrix.postTranslate(-face.faceRect.left, -face.faceRect.top);//90个点本来是以帧左上角为原点的, 这里改成以人脸抠图左上角为原点
+            matrix.mapPoints(mappedPoints, allPoints);
+            Canvas canvas = new Canvas(faceBitmap);
+            canvas.drawPoints(mappedPoints, paint);
+        }
+        faceResult.face = faceBitmap;
+        //设置数据字段
+        if (stuffBox.find(AlignmentStep.OUT_ALIGNMENT_OK_FACES).contains(face)) {
+            faceResult.alignment       = "alignmentOk";
+            faceResult.alignment_color = Color.GREEN;
+        } else if (stuffBox.find(AlignmentStep.OUT_ALIGNMENT_FAILED_FACES).containsKey(face)) {
+            faceResult.alignment       = "alignmentFail, " + stuffBox.find(AlignmentStep.OUT_ALIGNMENT_FAILED_FACES).get(face);
+            faceResult.alignment_color = Color.RED;
+        } else {
+            faceResult.alignment       = "alignment NONE";
+            faceResult.alignment_color = Color.GRAY;
+        }
+
+        if (stuffBox.find(QualityProStep.OUT_QUALITY_PRO_OK).contains(face)) {
+            faceResult.quality_pro       = "qualityProOk";
+            faceResult.quality_pro_color = Color.GREEN;
+        } else if (stuffBox.find(QualityProStep.OUT_QUALITY_PRO_FAILED).containsKey(face)) {
+            faceResult.quality_pro       = "qualityProFail, " + stuffBox.find(QualityProStep.OUT_QUALITY_PRO_FAILED).get(face);
+            faceResult.quality_pro_color = Color.RED;
+        } else {
+            faceResult.quality_pro       = "qualityPro NONE";
+            faceResult.quality_pro_color = Color.GRAY;
+        }
+
+        if (stuffBox.find(ColorLiveTaskStep.OUT_COLOR_LIVE_OK_SCORE).containsKey(face)) {
+            faceResult.color_live       = "colorLiveOk";
+            faceResult.color_live_color = Color.GREEN;
+        } else if (stuffBox.find(ColorLiveTaskStep.OUT_COLOR_LIVE_FAILED).containsKey(face)) {
+            faceResult.color_live       = "colorLiveFail, " + String.format("%.4f", stuffBox.find(ColorLiveTaskStep.OUT_COLOR_LIVE_FAILED).get(face));
+            faceResult.color_live_color = Color.RED;
+        } else {
+            faceResult.color_live       = "colorLive NONE";
+            faceResult.color_live_color = Color.GRAY;
+        }
+
+        if (stuffBox.find(IrLiveStep.OUT_IR_LIVE_OK).contains(face)) {
+            faceResult.ir_live       = "irLiveOk";
+            faceResult.ir_live_color = Color.GREEN;
+        } else if (stuffBox.find(IrLiveStep.OUT_IR_LIVE_FAILED).contains(face)) {
+            faceResult.ir_live       = "irLiveFail";
+            faceResult.ir_live_color = Color.RED;
+        } else {
+            faceResult.ir_live       = "irLive NONE";
+            faceResult.ir_live_color = Color.GRAY;
+        }
+
+        if (stuffBox.find(DepthLiveStep.OUT_DEPTH_LIVE_OK).contains(face)) {
+            faceResult.depth_live       = "depthLiveOk";
+            faceResult.depth_live_color = Color.GREEN;
+        } else if (stuffBox.find(DepthLiveStep.OUT_DEPTH_LIVE_FAILED).contains(face)) {
+            faceResult.depth_live       = "depthLiveFail";
+            faceResult.depth_live_color = Color.RED;
+        } else {
+            faceResult.depth_live       = "depthLive NONE";
+            faceResult.depth_live_color = Color.GRAY;
+        }
+
+        if (stuffBox.find(RetrievalStep.OUT_RETRIEVE_RESULTS).containsKey(face)) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("retrievalOK");
+            for (YTFaceRetrieval.RetrievedItem i : stuffBox.find(RetrievalStep.OUT_RETRIEVE_RESULTS).get(face)) {
+                sb.append("\n");
+                sb.append(String.format("%s, sco=%.1f,sim=%.3f", i.featureId, i.score, i.sim));
+                String tempUserName = i.featureId.split("\\.")[0];
+                if (null != mGetFaceListener)
+                    mGetFaceListener.addCheckName(tempUserName);
+            }
+            faceResult.retrieval       = sb.toString();
+            faceResult.retrieval_color = Color.GREEN;
+        } else {
+            faceResult.retrieval       = "retrieval NONE";
+            faceResult.retrieval_color = Color.GRAY;
+        }
+
+        if (stuffBox.find(CompareStep.OUT_COMPARE_SCORE).containsKey(face)) {
+            faceResult.compare       = "compare sco=" + stuffBox.find(CompareStep.OUT_COMPARE_SCORE).get(face);
+            faceResult.compare_color = Color.GREEN;
+        } else {
+            faceResult.compare       = "compare NONE";
+            faceResult.compare_color = Color.GRAY;
+        }
     }
 
     private GetFaceListener mGetFaceListener;

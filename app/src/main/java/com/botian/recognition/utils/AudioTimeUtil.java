@@ -36,10 +36,18 @@ public class AudioTimeUtil {
     public void countDownTime() {
         isCountDown = true;
         timer       = new Timer();
+        ThreadUtils.runOnMainThread(new Runnable() {
+            @Override
+            public void run() {
+                if (null != timeListener)
+                    timeListener.onStart("" + waitTime % 60);
+            }
+        });
         timer.schedule(new TimerTask() {
             public void run() {
                 if (waitTime != 0) {
                     waitTime--;
+                    isCountDown = true;
                     long ss = waitTime % 60;
                     //System.out.println("还剩" + ss + "秒");
                     ThreadUtils.runOnMainThread(new Runnable() {
@@ -97,6 +105,8 @@ public class AudioTimeUtil {
     }
 
     public interface TimeListener {
+        void onStart(String cont);
+
         void onChange(String cont);
 
         void onCancel();

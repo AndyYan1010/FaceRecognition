@@ -13,6 +13,7 @@ import com.botian.recognition.NetConfig;
 import com.botian.recognition.R;
 import com.botian.recognition.bean.CheckFaceHistory;
 import com.botian.recognition.bean.UpCheckResultBean;
+import com.botian.recognition.configure.LocalSetting;
 import com.botian.recognition.sdksupport.AIThreadPool;
 import com.botian.recognition.sdksupport.AbsActivityViewController;
 import com.botian.recognition.sdksupport.AndroidCameraManager;
@@ -31,6 +32,10 @@ import com.botian.recognition.utils.AudioTimeUtil;
 import com.botian.recognition.utils.ProgressDialogUtil;
 import com.botian.recognition.utils.TimeUtil;
 import com.botian.recognition.utils.ToastUtils;
+import com.botian.recognition.utils.fileUtils.AudioUtil;
+import com.botian.recognition.utils.fileUtils.FileUtil;
+import com.botian.recognition.utils.mediaUtils.SoundMediaPlayerUtil;
+import com.botian.recognition.utils.mediaUtils.SoundUtil;
 import com.botian.recognition.utils.netUtils.OkHttpUtils;
 import com.botian.recognition.utils.netUtils.RequestParamsFM;
 import com.botian.recognition.utils.netUtils.ThreadUtils;
@@ -108,7 +113,7 @@ public class RetrieveWithAndroidCameraActivity extends AppCompatActivity {
                     mOriCheckPersonNameList.clear();
                     return;
                 }
-                if (!AudioTimeUtil.getInstance().isCountDown() && !isSubmitting) {
+                if (!AudioTimeUtil.getInstance().isCountDown() && !isSubmitting && mOriCheckPersonNameList.size() > 0) {
                     //倒计时3秒后，抓拍人脸
                     checkFaceWaiteForThreeSecond();
                 }
@@ -129,6 +134,8 @@ public class RetrieveWithAndroidCameraActivity extends AppCompatActivity {
         });
         // 显示UI
         setContentView(mViewController.getRootView());
+        mViewController.setOriPersonList(mOriCheckPersonNameList);
+
         ((TextView) mViewController.getRootView().findViewById(R.id.title))
                 .setText("离线人脸识别" + (getIntent().getIntExtra("checkType", 1) == 1 ? "(上班)" : "(下班)"));
         ((TextView) mViewController.getRootView().findViewById(R.id.logTxt)).setText("请靠近凝视3秒确认打卡");
@@ -211,25 +218,29 @@ public class RetrieveWithAndroidCameraActivity extends AppCompatActivity {
                 @Override
                 protected boolean onProcess(StuffBox stuffBox) {
                     mViewController.drawHeavyThreadStuff(stuffBox);//UI绘制
-                    if (canShowAlert) {
-                        //保存打卡记录
-                        //keepCheckHistory(faceForConfirm.name);
-                        //提交打卡信息
-                        submitCheckFaceInfo(stuffBox, stuffBox.find(TrackStep.OUT_COLOR_FACE));
-                    }
+                    //if (canSubData && !isSubmitting) {
+                    //    //保存打卡记录
+                    //    //keepCheckHistory(faceForConfirm.name);
+                    //    //提交打卡信息
+                    //    
+                    //}
+                    mStuffBox = stuffBox;
                     return true;
                 }
             })
             .submit();
 
+    private StuffBox mStuffBox;
+
     /****提交人脸信息*/
-    private void submitCheckFaceInfo(StuffBox stuffBox, Collection<YTFaceTracker.TrackedFace> allFaces) {
+    private void submitCheckFaceInfo() {
         isSubmitting = true;
         ProgressDialogUtil.startShow(this, "正在提交数据...");
-        JSONArray peoplelist = new JSONArray();
+        JSONArray                             peoplelist = new JSONArray();
+        Collection<YTFaceTracker.TrackedFace> allFaces   = mStuffBox.find(TrackStep.OUT_COLOR_FACE);
         for (YTFaceTracker.TrackedFace face : allFaces) {
-            if (stuffBox.find(RetrievalStep.OUT_RETRIEVE_RESULTS).containsKey(face)) {
-                for (YTFaceRetrieval.RetrievedItem i : stuffBox.find(RetrievalStep.OUT_RETRIEVE_RESULTS).get(face)) {
+            if (mStuffBox.find(RetrievalStep.OUT_RETRIEVE_RESULTS).containsKey(face)) {
+                for (YTFaceRetrieval.RetrievedItem i : mStuffBox.find(RetrievalStep.OUT_RETRIEVE_RESULTS).get(face)) {
                     String userName = i.featureId.split("\\.")[0];
                     for (String name : mOriCheckPersonNameList) {
                         if (userName.equals(name)) {
@@ -269,44 +280,90 @@ public class RetrieveWithAndroidCameraActivity extends AppCompatActivity {
             @Override
             public void onSuccess(int code, String resbody) {
                 ProgressDialogUtil.hideDialog();
-                isSubmitting = false;
                 mOriCheckPersonNameList.clear();
                 if (code != 200) {
+                    isSubmitting = false;
                     ToastUtils.showToast("网络请求错误，打卡记录提交失败！");
                     return;
                 }
                 Gson              gson       = new Gson();
                 UpCheckResultBean resultBean = gson.fromJson(resbody, UpCheckResultBean.class);
                 ToastUtils.showToast(resultBean.getMessage());
+                tv_changeCont.setVisibility(View.VISIBLE);
+                tv_changeCont.setText(resultBean.getMessage());
                 if ("1".equals(resultBean.getCode())) {
                     //清除本地记录
                 }
+                //播报语音
+                playAudio(resultBean.getAudio());
             }
         });
     }
 
-    private boolean canShowAlert;
+    private String audioFilePath = "";
+
+    /***播报语音
+     * @param audio*/
+    private void playAudio(String audio) {
+        isSubmitting  = true;
+        audioFilePath = LocalSetting.AUDIO_PATH + "bobao.wav";
+        FileUtil.deleteFile(audioFilePath);
+        AudioUtil.getInstance().setChangeListener(new AudioUtil.ChangeFileListener() {
+            @Override
+            public void onSuccess() {
+                //播放音频
+                //SoundUtil.getInstance().playAudio(audioFilePath);
+                SoundMediaPlayerUtil.getInstance().getAudioTime(audioFilePath, new SoundMediaPlayerUtil.OnGetDurationListener() {
+                    @Override
+                    public void outAudioTime(int duration) {
+                        SoundUtil.getInstance().playAudio(audioFilePath);
+                        ThreadUtils.runOnSubThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    Thread.sleep(duration);
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                                isSubmitting = false;
+                            }
+                        });
+                    }
+                });
+            }
+
+            @Override
+            public void onFailed() {
+                isSubmitting = false;
+                ToastUtils.showToast("音频播放失败！");
+            }
+        }).decoderBase642File(audio, audioFilePath);
+    }
 
     /***倒计时3秒，抓拍人脸*/
     private void checkFaceWaiteForThreeSecond() {
-        AudioTimeUtil.getInstance().initData(4).setOnTimeListener(new AudioTimeUtil.TimeListener() {
+        AudioTimeUtil.getInstance().initData(3).setOnTimeListener(new AudioTimeUtil.TimeListener() {
+            @Override
+            public void onStart(String cont) {
+                tv_changeCont.setVisibility(View.VISIBLE);
+                tv_changeCont.setText(cont);
+            }
+
             @Override
             public void onChange(String cont) {
                 tv_changeCont.setVisibility(View.VISIBLE);
                 tv_changeCont.setText(cont);
-                canShowAlert = false;
             }
 
             @Override
             public void onCancel() {
                 tv_changeCont.setVisibility(View.INVISIBLE);
-                canShowAlert = false;
             }
 
             @Override
             public void onFinish() {
                 tv_changeCont.setVisibility(View.INVISIBLE);
-                canShowAlert = true;
+                submitCheckFaceInfo();
             }
         });
     }

@@ -184,7 +184,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnClickList
 
         @Override
         protected void onAllPermissionGranted() {
-            // 请修改人脸识别 SDK 授权信息
+            //// 请修改人脸识别 SDK 授权信息
             Auth.AuthResult authResult = auth(MainActivity2.this,
                     "whazsge55"/*修改APPID为实际的值*/,
                     "a2c0863f3ae943f3ac0603c7d4f2c28d"/*修改SECRET_KEY为实际的值*/);

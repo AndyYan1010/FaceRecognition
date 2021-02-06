@@ -235,6 +235,11 @@ public class CameraAutoUtil implements Camera.PreviewCallback {
         callContChangeListener(mTitleCont, "2");
         AudioTimeUtil.getInstance().initData(2).setOnTimeListener(new AudioTimeUtil.TimeListener() {
             @Override
+            public void onStart(String cont) {
+                callContChangeListener(mTitleCont, cont);
+            }
+
+            @Override
             public void onChange(String cont) {
                 callContChangeListener(mTitleCont, cont);
             }
