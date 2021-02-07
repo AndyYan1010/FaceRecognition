@@ -18,7 +18,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.android.jws.JwsIntents;
-import com.botian.recognition.activity.RetrieveWithAndroidCameraActivity;
+import com.botian.recognition.activity.RetrieveWithAndroidCameraActivityOri;
 import com.botian.recognition.activity.TXLiveFaceCheckActivity;
 import com.botian.recognition.sdksupport.AIThreadPool;
 import com.botian.recognition.utils.PhoneInfoUtil;
@@ -91,13 +91,15 @@ public class MainActivity2 extends AppCompatActivity implements View.OnClickList
                 break;
             case R.id.tv_toWork:
                 //上班
-                Intent intent = new Intent(MainActivity2.this, RetrieveWithAndroidCameraActivity.class);
+                //Intent intent = new Intent(MainActivity2.this, RetrieveWithAndroidCameraActivity.class);
+                Intent intent = new Intent(MainActivity2.this, RetrieveWithAndroidCameraActivityOri.class);
                 intent.putExtra("checkType", 1);
                 startActivity(intent);
                 break;
             case R.id.tv_offWork:
                 //下班
-                Intent intent1 = new Intent(MainActivity2.this, RetrieveWithAndroidCameraActivity.class);
+                //Intent intent1 = new Intent(MainActivity2.this, RetrieveWithAndroidCameraActivity.class);
+                Intent intent1 = new Intent(MainActivity2.this, RetrieveWithAndroidCameraActivityOri.class);
                 intent1.putExtra("checkType", 2);
                 startActivity(intent1);
                 break;

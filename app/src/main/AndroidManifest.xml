@@ -29,7 +29,7 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <!-- 摄影机 -->
     <uses-permission android:name="android.permission.CAMERA" />
-    
+
 
     <uses-feature android:name="android.hardware.camera.autofocus" />
     <uses-feature
@@ -112,6 +112,11 @@
             android:windowSoftInputMode="adjustUnspecified|stateHidden" />
         <activity
             android:name=".activity.RetrieveWithAndroidCameraActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustUnspecified|stateHidden" />
+        <activity
+            android:name=".activity.RetrieveWithAndroidCameraActivityOri"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustUnspecified|stateHidden" />
