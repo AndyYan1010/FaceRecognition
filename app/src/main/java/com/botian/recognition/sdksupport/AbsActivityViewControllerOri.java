@@ -17,6 +17,7 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import com.botian.recognition.R;
+import com.botian.recognition.activity.RetrieveWithAndroidCameraActivityOri;
 import com.tencent.cloud.ai.fr.camera.Frame;
 import com.tencent.cloud.ai.fr.utils.ImageConverter;
 import com.tencent.youtu.YTFaceAlignment;
@@ -191,6 +192,9 @@ public abstract class AbsActivityViewControllerOri {
 
         //有些机器上, 绘制人脸框的 SurfaceView 可能有兼容性问题, 所以这里也用文字显示一下, 方便排查
         final String ms = "检测到人脸数量: " + allFaces.size();
+        if (null != mGetFaceListener) {
+            mGetFaceListener.onGetFaceNum(allFaces.size());
+        }
         mFindFaceText.post(new Runnable() {
             @Override
             public void run() {
@@ -291,7 +295,6 @@ public abstract class AbsActivityViewControllerOri {
         // 每个人脸详细结果
         for (YTFaceTracker.TrackedFace face : colorFaces) {
             FaceResult faceResult = new FaceResult();
-            faceResults.add(faceResult);
 
             // 裁出人脸小图
             YTImage ytImage    = YTUtils.cropRGB888(colorFrame.data, colorFrame.width, colorFrame.height, face.faceRect);
@@ -377,11 +380,16 @@ public abstract class AbsActivityViewControllerOri {
             }
 
             if (stuffBox.find(RetrievalStep.OUT_RETRIEVE_RESULTS).containsKey(face)) {
+                if (mActivityOri.isCanGetFace())
+                    faceResults.add(faceResult);
                 StringBuilder sb = new StringBuilder();
                 sb.append("retrievalOK");
                 for (YTFaceRetrieval.RetrievedItem i : stuffBox.find(RetrievalStep.OUT_RETRIEVE_RESULTS).get(face)) {
                     sb.append("\n");
                     sb.append(String.format("%s, sco=%.1f,sim=%.3f", i.featureId, i.score, i.sim));
+                    String userName = i.featureId.split("\\.")[0];
+                    if (null != mGetFaceListener)
+                        mGetFaceListener.onGetFace(userName);
                 }
                 faceResult.retrieval       = sb.toString();
                 faceResult.retrieval_color = Color.GREEN;
@@ -483,5 +491,19 @@ public abstract class AbsActivityViewControllerOri {
 
         String compare;
         int    compare_color;
+    }
+
+    private OnGetFaceListener                    mGetFaceListener;
+    private RetrieveWithAndroidCameraActivityOri mActivityOri;
+
+    public void setGetFaceListener(RetrieveWithAndroidCameraActivityOri activityOri, OnGetFaceListener getFaceListener) {
+        mActivityOri     = activityOri;
+        mGetFaceListener = getFaceListener;
+    }
+
+    public interface OnGetFaceListener {
+        void onGetFaceNum(int faceSize);
+
+        void onGetFace(String name);
     }
 }
