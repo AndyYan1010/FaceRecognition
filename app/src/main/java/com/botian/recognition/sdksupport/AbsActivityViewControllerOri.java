@@ -292,6 +292,11 @@ public abstract class AbsActivityViewControllerOri {
         // UI 数据
         Collection<YTFaceTracker.TrackedFace> colorFaces  = stuffBox.find(TrackStep.OUT_COLOR_FACE);
         final List<FaceResult>                faceResults = new ArrayList<>(colorFaces.size());
+
+        //返回抓取到的人脸(带认证信息)
+        if (null != mGetFaceListener)
+            mGetFaceListener.onGetFace(colorFaces, stuffBox);
+
         // 每个人脸详细结果
         for (YTFaceTracker.TrackedFace face : colorFaces) {
             FaceResult faceResult = new FaceResult();
@@ -299,7 +304,6 @@ public abstract class AbsActivityViewControllerOri {
             // 裁出人脸小图
             YTImage ytImage    = YTUtils.cropRGB888(colorFrame.data, colorFrame.width, colorFrame.height, face.faceRect);
             Bitmap  faceBitmap = ImageConverter.rgbToBitmap(ytImage.data, ytImage.width, ytImage.height);
-
             // 在人脸小图上绘制90个点
             YTFaceAlignment.FaceShape faceShape = stuffBox.find(AlignmentStep.OUT_FACE_SHAPE).get(face);
             if (faceShape != null && faceBitmap != null) {
@@ -380,6 +384,7 @@ public abstract class AbsActivityViewControllerOri {
             }
 
             if (stuffBox.find(RetrievalStep.OUT_RETRIEVE_RESULTS).containsKey(face)) {
+                //自定义显示人脸
                 if (mActivityOri.isCanGetFace())
                     faceResults.add(faceResult);
                 StringBuilder sb = new StringBuilder();
@@ -389,7 +394,7 @@ public abstract class AbsActivityViewControllerOri {
                     sb.append(String.format("%s, sco=%.1f,sim=%.3f", i.featureId, i.score, i.sim));
                     String userName = i.featureId.split("\\.")[0];
                     if (null != mGetFaceListener)
-                        mGetFaceListener.onGetFace(userName);
+                        mGetFaceListener.onAddFaceName(userName);
                 }
                 faceResult.retrieval       = sb.toString();
                 faceResult.retrieval_color = Color.GREEN;
@@ -504,6 +509,8 @@ public abstract class AbsActivityViewControllerOri {
     public interface OnGetFaceListener {
         void onGetFaceNum(int faceSize);
 
-        void onGetFace(String name);
+        void onGetFace(Collection<YTFaceTracker.TrackedFace> colorFaces, StuffBox stuffBox);
+
+        void onAddFaceName(String name);
     }
 }

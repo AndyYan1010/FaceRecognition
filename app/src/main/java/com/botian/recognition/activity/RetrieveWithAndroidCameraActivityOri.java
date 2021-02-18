@@ -44,6 +44,8 @@ import com.tencent.cloud.ai.fr.camera.Frame;
 import com.tencent.cloud.ai.fr.camera.FrameGroup;
 import com.tencent.cloud.ai.fr.camera.ICameraManager;
 import com.tencent.cloud.ai.fr.pipeline.AbsStep;
+import com.tencent.youtu.YTFaceRetrieval;
+import com.tencent.youtu.YTFaceTracker;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -60,6 +62,7 @@ public class RetrieveWithAndroidCameraActivityOri extends AppCompatActivity {
     private ICameraManager               mCameraManager;
     private AbsActivityViewControllerOri mViewController;
     private List<String>                 mPersonDataList;
+    private List<String>                 mLstPersonDataList;
     private boolean                      canGetFace   = true;
     private boolean                      isSubmitting = false;
     private Handler                      mHandler;
@@ -68,12 +71,14 @@ public class RetrieveWithAndroidCameraActivityOri extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mPersonDataList    = new ArrayList();
+        mLstPersonDataList = new ArrayList();
+        mHandler           = new Handler();
+        canGetFace         = true;
+        isSubmitting       = false;
         AIThreadPool.instance().init(this);//重要!!
         // 恢复人脸库
         new AsyncJobBuilder(new StuffBox(), mRecoverFaceLibraryPipelineBuilder).synthesize(/*合成流水线任务*/).launch(/*执行任务*/);
-
-        mPersonDataList = new ArrayList();
-        mHandler        = new Handler();
         // 初始化相机
         mCameraManager = new AndroidCameraManager(this);
         // 监听相机帧回调
@@ -111,6 +116,7 @@ public class RetrieveWithAndroidCameraActivityOri extends AppCompatActivity {
                 if (faceSize <= 0) {
                     AudioTimeUtil.getInstance().stopCountDown();
                     mPersonDataList.clear();
+                    canGetFace = true;
                     return;
                 }
                 if (!AudioTimeUtil.getInstance().isCountDown() && !isSubmitting && mPersonDataList.size() > 0) {
@@ -120,15 +126,31 @@ public class RetrieveWithAndroidCameraActivityOri extends AppCompatActivity {
             }
 
             @Override
-            public void onGetFace(String name) {
+            public void onGetFace(Collection<YTFaceTracker.TrackedFace> colorFaces, StuffBox stuffBox) {
+                if (isSubmitting) {
+                    return;
+                }
+                mLstPersonDataList.clear();
+                for (YTFaceTracker.TrackedFace face : colorFaces) {
+                    if (stuffBox.find(RetrievalStep.OUT_RETRIEVE_RESULTS).containsKey(face)) {
+                        for (YTFaceRetrieval.RetrievedItem i : stuffBox.find(RetrievalStep.OUT_RETRIEVE_RESULTS).get(face)) {
+                            String userName = i.featureId.split("\\.")[0];
+                            mLstPersonDataList.add(userName);
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onAddFaceName(String name) {
                 if (!canGetFace) {
                     return;
                 }
                 if (mPersonDataList.size() == 0) {
                     mPersonDataList.add(name);
                 } else {
-                    for (int i = 0; i < mPersonDataList.size(); i++) {
-                        if (!mPersonDataList.get(i).equals(name)) {
+                    for (int m = 0; m < mPersonDataList.size(); m++) {
+                        if (!mPersonDataList.get(m).equals(name)) {
                             mPersonDataList.add(name);
                         }
                     }
@@ -217,7 +239,6 @@ public class RetrieveWithAndroidCameraActivityOri extends AppCompatActivity {
         AudioTimeUtil.getInstance().initData(3).setOnTimeListener(new AudioTimeUtil.TimeListener() {
             @Override
             public void onStart(String cont) {
-                canGetFace = true;
                 tv_changeCont.setVisibility(View.VISIBLE);
                 tv_changeCont.setText(cont);
             }
@@ -230,6 +251,8 @@ public class RetrieveWithAndroidCameraActivityOri extends AppCompatActivity {
 
             @Override
             public void onCancel() {
+                mHandler.removeCallbacksAndMessages(null);
+                canGetFace = true;
                 tv_changeCont.setVisibility(View.INVISIBLE);
             }
 
@@ -244,24 +267,28 @@ public class RetrieveWithAndroidCameraActivityOri extends AppCompatActivity {
             public void run() {
                 canGetFace = false;
             }
-        }, 1500);
+        }, 1000);
     }
 
     /****提交人脸信息*/
     private void submitCheckFaceInfo() {
         isSubmitting = true;
+        canGetFace   = false;
         ProgressDialogUtil.startShow(this, "正在提交数据...");
         JSONArray peoplelist = new JSONArray();
         for (String userName : mPersonDataList) {
-            try {
-                JSONObject jsonObject = new JSONObject();
-                jsonObject.put("userid", "1001");
-                jsonObject.put("username", userName);
-                jsonObject.put("type", getIntent().getIntExtra("checkType", 1));
-                jsonObject.put("ftime", TimeUtil.getNowDateAndTimeStr());
-                peoplelist.put(jsonObject);
-            } catch (Exception e) {
-                System.out.println(e);
+            //剔除离开的人员
+            if (mLstPersonDataList.contains(userName)) {
+                try {
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put("userid", "1001");
+                    jsonObject.put("username", userName);
+                    jsonObject.put("type", getIntent().getIntExtra("checkType", 1));
+                    jsonObject.put("ftime", TimeUtil.getNowDateAndTimeStr());
+                    peoplelist.put(jsonObject);
+                } catch (Exception e) {
+                    System.out.println(e);
+                }
             }
         }
         if (peoplelist.length() == 0) {
@@ -274,6 +301,7 @@ public class RetrieveWithAndroidCameraActivityOri extends AppCompatActivity {
         RequestParamsFM params = new RequestParamsFM();
         params.put("peoplelist", peoplelist);
         params.setUseJsonStreamer(true);
+        ((TextView) mViewController.getRootView().findViewById(R.id.logTxt)).setText(peoplelist.toString());
         OkHttpUtils.getInstance().doPost(NetConfig.UPDATEWORK, params, new OkHttpUtils.HttpCallBack() {
             @Override
             public void onError(Request request, IOException e) {
@@ -314,6 +342,7 @@ public class RetrieveWithAndroidCameraActivityOri extends AppCompatActivity {
      * @param audio*/
     private void playAudio(String audio) {
         isSubmitting  = true;
+        canGetFace    = false;
         audioFilePath = LocalSetting.AUDIO_PATH + "bobao.wav";
         FileUtil.deleteFile(audioFilePath);
         AudioUtil.getInstance().setChangeListener(new AudioUtil.ChangeFileListener() {
