@@ -65,17 +65,18 @@ public class RetrieveWithAndroidCameraActivityOri extends AppCompatActivity {
     private List<String>                 mLastPersonDataList;
     private boolean                      canGetFace   = true;
     private boolean                      isSubmitting = false;
+    private boolean                      isAddPerson  = false;
     private Handler                      mHandler;
     private TextView                     tv_changeCont;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mPersonDataList    = new ArrayList();
+        mPersonDataList     = new ArrayList();
         mLastPersonDataList = new ArrayList();
-        mHandler           = new Handler();
-        canGetFace         = true;
-        isSubmitting       = false;
+        mHandler            = new Handler();
+        canGetFace          = true;
+        isSubmitting        = false;
         AIThreadPool.instance().init(this);//重要!!
         // 恢复人脸库
         new AsyncJobBuilder(new StuffBox(), mRecoverFaceLibraryPipelineBuilder).synthesize(/*合成流水线任务*/).launch(/*执行任务*/);
@@ -146,6 +147,10 @@ public class RetrieveWithAndroidCameraActivityOri extends AppCompatActivity {
                 if (!canGetFace) {
                     return;
                 }
+                if (isAddPerson) {
+                    return;
+                }
+                isAddPerson = true;
                 if (mPersonDataList.size() == 0) {
                     mPersonDataList.add(name);
                 } else {
@@ -155,6 +160,7 @@ public class RetrieveWithAndroidCameraActivityOri extends AppCompatActivity {
                         }
                     }
                 }
+                isAddPerson = false;
             }
         });
         // 显示UI
