@@ -62,7 +62,7 @@ public class RetrieveWithAndroidCameraActivityOri extends AppCompatActivity {
     private ICameraManager               mCameraManager;
     private AbsActivityViewControllerOri mViewController;
     private List<String>                 mPersonDataList;
-    private List<String>                 mLstPersonDataList;
+    private List<String>                 mLastPersonDataList;
     private boolean                      canGetFace   = true;
     private boolean                      isSubmitting = false;
     private Handler                      mHandler;
@@ -72,7 +72,7 @@ public class RetrieveWithAndroidCameraActivityOri extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mPersonDataList    = new ArrayList();
-        mLstPersonDataList = new ArrayList();
+        mLastPersonDataList = new ArrayList();
         mHandler           = new Handler();
         canGetFace         = true;
         isSubmitting       = false;
@@ -130,12 +130,12 @@ public class RetrieveWithAndroidCameraActivityOri extends AppCompatActivity {
                 if (isSubmitting) {
                     return;
                 }
-                mLstPersonDataList.clear();
+                mLastPersonDataList.clear();
                 for (YTFaceTracker.TrackedFace face : colorFaces) {
                     if (stuffBox.find(RetrievalStep.OUT_RETRIEVE_RESULTS).containsKey(face)) {
                         for (YTFaceRetrieval.RetrievedItem i : stuffBox.find(RetrievalStep.OUT_RETRIEVE_RESULTS).get(face)) {
                             String userName = i.featureId.split("\\.")[0];
-                            mLstPersonDataList.add(userName);
+                            mLastPersonDataList.add(userName);
                         }
                     }
                 }
@@ -150,7 +150,7 @@ public class RetrieveWithAndroidCameraActivityOri extends AppCompatActivity {
                     mPersonDataList.add(name);
                 } else {
                     for (int m = 0; m < mPersonDataList.size(); m++) {
-                        if (!mPersonDataList.get(m).equals(name)) {
+                        if (!mPersonDataList.contains(name)) {
                             mPersonDataList.add(name);
                         }
                     }
@@ -278,7 +278,7 @@ public class RetrieveWithAndroidCameraActivityOri extends AppCompatActivity {
         JSONArray peoplelist = new JSONArray();
         for (String userName : mPersonDataList) {
             //剔除离开的人员
-            if (mLstPersonDataList.contains(userName)) {
+            if (mLastPersonDataList.contains(userName)) {
                 try {
                     JSONObject jsonObject = new JSONObject();
                     jsonObject.put("userid", "1001");
