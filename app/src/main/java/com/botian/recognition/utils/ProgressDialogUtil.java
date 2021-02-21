@@ -28,7 +28,7 @@ public class ProgressDialogUtil {
             //    mProgressDialog.setCancelable(true);
             //}
             //mProgressDialog.show();
-            WaitDialog.show((AppCompatActivity) context, "请稍候...");
+            WaitDialog.show((AppCompatActivity) context, message);
         } catch (Exception e) {
         }
     }

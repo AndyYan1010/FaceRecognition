@@ -35,7 +35,7 @@
         <Spinner
             android:id="@+id/spinner_list"
             android:layout_width="wrap_content"
-            android:layout_height="40dp"
+            android:layout_height="60dp"
             android:minWidth="60dp"
             android:spinnerMode="dialog" />
 
@@ -44,6 +44,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
+            android:minWidth="100dp"
+            android:minHeight="60dp"
+            android:gravity="center"
             android:text="注册"
             android:textSize="12sp" />
 
@@ -52,6 +55,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
+            android:minWidth="100dp"
+            android:gravity="center"
+            android:minHeight="60dp"
             android:text="重新抓取"
             android:textSize="12sp" />
 
@@ -60,6 +66,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
+            android:gravity="center"
+            android:minWidth="100dp"
+            android:minHeight="60dp"
             android:text="退出注册流程"
             android:textSize="12sp" />
     </LinearLayout>

@@ -28,6 +28,7 @@ import com.botian.recognition.sdksupport.SaveFeaturesToFileStep;
 import com.botian.recognition.sdksupport.ShowCheckFaceDialogView;
 import com.botian.recognition.sdksupport.StuffBox;
 import com.botian.recognition.sdksupport.TrackStep;
+import com.botian.recognition.utils.ProgressDialogUtil;
 import com.botian.recognition.utils.ToastUtils;
 import com.botian.recognition.utils.netUtils.OkHttpUtils;
 import com.botian.recognition.utils.netUtils.RequestParamsFM;
@@ -273,6 +274,7 @@ public class RegWithAndroidCameraActivity extends AppCompatActivity {
     /***提交人脸特征值
      * @param faceForRegs*/
     private void upLoadFaceFature(Collection<FaceForReg> faceForRegs) {
+        ProgressDialogUtil.startShow(this, "正在提交人脸特征值");
         JSONArray peoplelist = new JSONArray();
         for (FaceForReg faceForReg : faceForRegs) {
             try {
@@ -290,11 +292,13 @@ public class RegWithAndroidCameraActivity extends AppCompatActivity {
         OkHttpUtils.getInstance().doPost(NetConfig.UPDATEUSERNOTE, params, new OkHttpUtils.HttpCallBack() {
             @Override
             public void onError(Request request, IOException e) {
+                ProgressDialogUtil.hideDialog();
                 ToastUtils.showToast("人脸特征值提交失败！");
             }
 
             @Override
             public void onSuccess(int code, String resbody) {
+                ProgressDialogUtil.hideDialog();
                 System.out.println("提交返回信息：" + resbody);
                 if (code != 200) {
                     ToastUtils.showToast("网络请求错误，人脸特征值提交失败！");
