@@ -23,7 +23,8 @@
             android:background="@drawable/bg_round_corner_orange"
             android:gravity="center"
             android:text="上班"
-            android:textColor="@color/white" />
+            android:textColor="@color/white"
+            android:textSize="20dp" />
 
         <TextView
             android:id="@+id/tv_offWork"
@@ -33,7 +34,8 @@
             android:background="@drawable/bg_round_corner_orange"
             android:gravity="center"
             android:text="下班"
-            android:textColor="@color/white" />
+            android:textColor="@color/white"
+            android:textSize="20dp" />
     </LinearLayout>
 
 </LinearLayout>

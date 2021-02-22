@@ -77,6 +77,8 @@ public class RetrieveWithAndroidCameraActivityOri extends AppCompatActivity {
         mHandler            = new Handler();
         canGetFace          = true;
         isSubmitting        = false;
+        AudioTimeUtil.getInstance().clearOldData();
+        
         AIThreadPool.instance().init(this);//重要!!
         // 恢复人脸库
         new AsyncJobBuilder(new StuffBox(), mRecoverFaceLibraryPipelineBuilder).synthesize(/*合成流水线任务*/).launch(/*执行任务*/);
@@ -442,6 +444,7 @@ public class RetrieveWithAndroidCameraActivityOri extends AppCompatActivity {
             mHandler.removeCallbacksAndMessages(null);
             mHandler = null;
         }
+        AudioTimeUtil.getInstance().stopCountDown();
         super.onDestroy();
     }
 }

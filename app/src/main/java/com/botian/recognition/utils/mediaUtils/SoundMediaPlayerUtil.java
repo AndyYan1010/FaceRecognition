@@ -90,12 +90,17 @@ public class SoundMediaPlayerUtil implements MediaPlayer.OnCompletionListener, M
 
     public void getAudioTime(String audioPath, OnGetDurationListener getDurationListener) {
         try {
-            mediaPlayer = new MediaPlayer();
+            if (null == mediaPlayer) {
+                mediaPlayer = new MediaPlayer();
+            } else {
+                if (mediaPlayer.isPlaying())
+                    mediaPlayer.stop();
+                mediaPlayer.reset();
+            }
             mediaPlayer.setDataSource(audioPath);//指定音频文件路径
-            mediaPlayer.setLooping(false);//设置为循环播放
+            //mediaPlayer.setLooping(false);//设置为循环播放
             mediaPlayer.prepare();//初始化播放器MediaPlayer
-            if (null != getDurationListener)
-                getDurationListener.outAudioTime(mediaPlayer.getDuration());
+            this.getDurationListener = getDurationListener;
         } catch (Exception e) {
         }
     }

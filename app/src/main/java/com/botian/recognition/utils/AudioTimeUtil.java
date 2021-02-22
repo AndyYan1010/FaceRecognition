@@ -79,6 +79,13 @@ public class AudioTimeUtil {
         return isCountDown;
     }
 
+    /***清除缓存数据*/
+    public void clearOldData() {
+        if (null != timer && isCountDown)
+            timer.cancel();
+        isCountDown = false;
+    }
+
     /***
      * 停止倒计时
      * */
