@@ -210,7 +210,7 @@ public class CameraAutoUtil implements Camera.PreviewCallback {
     public void stopCamera() {
         //先取消倒计时任务
         if (AudioTimeUtil.getInstance().isCountDown()) {
-            AudioTimeUtil.getInstance().stopCountDown();
+            AudioTimeUtil.getInstance().cancelCountDown();
         }
         //释放相机资源
         if (mCamera != null) {

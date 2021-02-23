@@ -87,9 +87,9 @@ public class AudioTimeUtil {
     }
 
     /***
-     * 停止倒计时
+     * 取消倒计时
      * */
-    public void stopCountDown() {
+    public void cancelCountDown() {
         if (null != timer)
             timer.cancel();
         isCountDown = false;
@@ -100,6 +100,13 @@ public class AudioTimeUtil {
                     timeListener.onCancel();
             }
         });
+    }
+
+    /***关闭*/
+    public void stop(){
+        if (null != timer)
+            timer.cancel();
+        isCountDown = false;
     }
 
     /**
