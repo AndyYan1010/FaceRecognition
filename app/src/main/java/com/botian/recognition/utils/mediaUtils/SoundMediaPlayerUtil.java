@@ -114,8 +114,9 @@ public class SoundMediaPlayerUtil implements MediaPlayer.OnCompletionListener, M
 
     @Override
     public void onPrepared(MediaPlayer mp) {
-        if (null != mediaPlayer) {
-            audioDuration = mediaPlayer.getDuration();
+        if (null != mp) {
+            audioDuration = mp.getDuration();
+            mp.start();
         }
         if (null != getDurationListener) {
             getDurationListener.outAudioTime(audioDuration);

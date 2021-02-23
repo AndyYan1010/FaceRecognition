@@ -361,7 +361,7 @@ public class RetrieveWithAndroidCameraActivityOri extends AppCompatActivity {
                 SoundMediaPlayerUtil.getInstance().getAudioTime(audioFilePath, new SoundMediaPlayerUtil.OnGetDurationListener() {
                     @Override
                     public void outAudioTime(int duration) {
-                        SoundUtil.getInstance().playAudio(audioFilePath);
+//                        SoundUtil.getInstance().playAudio(audioFilePath);
                         ThreadUtils.runOnSubThread(new Runnable() {
                             @Override
                             public void run() {
