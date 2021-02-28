@@ -1,9 +1,11 @@
 package com.botian.recognition.activity;
 
 import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.botian.recognition.MyApplication;
@@ -79,7 +81,7 @@ public class RegWithAndroidCameraActivity extends AppCompatActivity {
         setContentView(mViewController.getRootView());
 
         //获取人员列表 personList
-        mPersonList = (List<PersonListResultBean.ListBean>) getIntent().getSerializableExtra("personList");
+        //mPersonList = (List<PersonListResultBean.ListBean>) getIntent().getSerializableExtra("personList");
 
         // 初始化相机
         mCameraManager = new AndroidCameraManager(this);
@@ -169,6 +171,7 @@ public class RegWithAndroidCameraActivity extends AppCompatActivity {
                     //    RegWithAndroidCameraActivity.this.finish();
                     //}
                     ThreadUtils.runOnMainThread(new Runnable() {
+                        @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
                         @Override
                         public void run() {
                             ShowCheckFaceDialogView faceDialogView = null;
@@ -310,7 +313,7 @@ public class RegWithAndroidCameraActivity extends AppCompatActivity {
                 if (!"1".equals(commonBean.getCode())) {
                     return;
                 }
-                //finish();
+                finish();
             }
         });
     }

@@ -75,7 +75,7 @@ public class TXLiveFaceCheckActivity extends BaseActivity implements View.OnClic
         //初始化人员列表spinner
         //initSpinnerView();
         //获取人员列表
-        getPersonList();
+        //getPersonList();
     }
 
     @Override
@@ -88,10 +88,10 @@ public class TXLiveFaceCheckActivity extends BaseActivity implements View.OnClic
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.tv_regist:
-                if (mPersonList.size() == 0) {
-                    ToastUtils.showToast("未获取到人员信息，请重新进入页面！");
-                    return;
-                }
+                //if (mPersonList.size() == 0) {
+                //    ToastUtils.showToast("未获取到人员信息，请重新进入页面！");
+                //    return;
+                //}
                 Intent intent = new Intent(TXLiveFaceCheckActivity.this, RegWithAndroidCameraActivity.class);
                 intent.putExtra("personList", (Serializable) mPersonList);
                 startActivity(intent);
@@ -179,7 +179,7 @@ public class TXLiveFaceCheckActivity extends BaseActivity implements View.OnClic
             @Override
             public void onSuccess(int code, String resbody) {
                 if (code != 200) {
-                    ToastUtils.showToast("网络请求错误，人脸特征值提交失败！");
+                    ToastUtils.showToast("网络请求错误，人员列表获取失败！");
                     return;
                 }
                 Gson                 gson       = new Gson();
