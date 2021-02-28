@@ -109,7 +109,7 @@ public class RetrieveWithAndroidCameraActivity extends AppCompatActivity {
             @Override
             public void getFaceNum(StuffBox stuffBox, Collection<YTFaceTracker.TrackedFace> allFaces, int faceSize) {
                 if (faceSize <= 0) {
-                    AudioTimeUtil.getInstance().stopCountDown();
+                    AudioTimeUtil.getInstance().cancelCountDown();
                     mOriCheckPersonNameList.clear();
                     return;
                 }

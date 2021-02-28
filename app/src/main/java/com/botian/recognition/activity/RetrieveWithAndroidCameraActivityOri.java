@@ -117,7 +117,7 @@ public class RetrieveWithAndroidCameraActivityOri extends AppCompatActivity {
             @Override
             public void onGetFaceNum(int faceSize) {
                 if (faceSize <= 0) {
-                    AudioTimeUtil.getInstance().stopCountDown();
+                    AudioTimeUtil.getInstance().cancelCountDown();
                     mPersonDataList.clear();
                     canGetFace = true;
                     return;
@@ -361,7 +361,7 @@ public class RetrieveWithAndroidCameraActivityOri extends AppCompatActivity {
                 SoundMediaPlayerUtil.getInstance().getAudioTime(audioFilePath, new SoundMediaPlayerUtil.OnGetDurationListener() {
                     @Override
                     public void outAudioTime(int duration) {
-                        SoundUtil.getInstance().playAudio(audioFilePath);
+//                        SoundUtil.getInstance().playAudio(audioFilePath);
                         ThreadUtils.runOnSubThread(new Runnable() {
                             @Override
                             public void run() {
@@ -444,7 +444,7 @@ public class RetrieveWithAndroidCameraActivityOri extends AppCompatActivity {
             mHandler.removeCallbacksAndMessages(null);
             mHandler = null;
         }
-        AudioTimeUtil.getInstance().stopCountDown();
+        AudioTimeUtil.getInstance().stop();
         super.onDestroy();
     }
 }
