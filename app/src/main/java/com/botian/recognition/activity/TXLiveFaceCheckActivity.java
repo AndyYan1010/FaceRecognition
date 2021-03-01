@@ -35,7 +35,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -46,6 +45,7 @@ import static com.tencent.cloud.ai.fr.sdksupport.Auth.authWithDeviceSn;
 
 public class TXLiveFaceCheckActivity extends BaseActivity implements View.OnClickListener {
     private TextView                            tv_regist;
+    private TextView                            tv_regist_pic;
     private TextView                            tv_upload;
     //private Spinner                             mPersonSpinner;
     //private SpPersonNameAdapter                 mSpAdapter;
@@ -59,8 +59,9 @@ public class TXLiveFaceCheckActivity extends BaseActivity implements View.OnClic
     @Override
     protected void initView(Bundle savedInstanceState) {
         //mPersonSpinner = findViewById(R.id.spinner_list);
-        tv_regist = findViewById(R.id.tv_regist);
-        tv_upload = findViewById(R.id.tv_upload);
+        tv_regist     = findViewById(R.id.tv_regist);
+        tv_regist_pic = findViewById(R.id.tv_regist_pic);
+        tv_upload     = findViewById(R.id.tv_upload);
     }
 
     @Override
@@ -81,6 +82,7 @@ public class TXLiveFaceCheckActivity extends BaseActivity implements View.OnClic
     @Override
     protected void initListener() {
         tv_regist.setOnClickListener(this);
+        tv_regist_pic.setOnClickListener(this);
         tv_upload.setOnClickListener(this);
     }
 
@@ -93,8 +95,12 @@ public class TXLiveFaceCheckActivity extends BaseActivity implements View.OnClic
                 //    return;
                 //}
                 Intent intent = new Intent(TXLiveFaceCheckActivity.this, RegWithAndroidCameraActivity.class);
-                intent.putExtra("personList", (Serializable) mPersonList);
+                //intent.putExtra("personList", (Serializable) mPersonList);
                 startActivity(intent);
+                break;
+            case R.id.tv_regist_pic:
+                Intent intentPic = new Intent(TXLiveFaceCheckActivity.this, RegWithFileActivity.class);
+                startActivity(intentPic);
                 break;
             case R.id.tv_upload:
                 //提交本地打卡信息
@@ -110,7 +116,7 @@ public class TXLiveFaceCheckActivity extends BaseActivity implements View.OnClic
     /***提交本地打卡记录到服务器*/
     private void upLoadLocalCheckInfo() {
         //读取本地数据库的打卡信息
-        ProgressDialogUtil.startShow(this,"正在提交数据...");
+        ProgressDialogUtil.startShow(this, "正在提交数据...");
         List<CheckFaceHistory> checkFaceHistories = readLocalCheckHistory();
         if (checkFaceHistories.size() == 0) {
             ProgressDialogUtil.hideDialog();
