@@ -94,9 +94,9 @@ public class ShowCheckFaceDialogView {
         spinnerPerson.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                selectID   = mPersonList.get(position).getId();
                 selectName = mPersonList.get(position).getFname();
-                ((RegWithAndroidCameraActivity) context).setSelectName(selectName);
+                selectID   = mPersonList.get(position).getId();
+                ((RegWithAndroidCameraActivity) context).setSelectName(selectName, selectID);
             }
 
             @Override
@@ -174,7 +174,9 @@ public class ShowCheckFaceDialogView {
                 }
                 if (null != resultBean.getList() && resultBean.getList().size() > 0) {
                     selectName = resultBean.getList().get(0).getFname();
+                    selectID   = resultBean.getList().get(0).getId();
                     tv_name.setText(selectName);
+                    ((RegWithAndroidCameraActivity) context).setSelectName(selectName, selectID);
                 } else {
                     ToastUtils.showToast("网络请求错误，人员姓名查询失败！");
                 }

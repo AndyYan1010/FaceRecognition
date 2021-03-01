@@ -8,7 +8,6 @@ import android.view.View;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.botian.recognition.MyApplication;
 import com.botian.recognition.NetConfig;
 import com.botian.recognition.bean.CommonBean;
 import com.botian.recognition.bean.PersonListResultBean;
@@ -63,6 +62,7 @@ public class RegWithAndroidCameraActivity extends AppCompatActivity {
     public  boolean                             isShowDialog = false;//
     public  int                                 selectButton = -1;//
     public  String                              selectName   = "";//
+    public  String                              selectID     = "";//
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,8 +119,9 @@ public class RegWithAndroidCameraActivity extends AppCompatActivity {
         selectButton = type;
     }
 
-    public void setSelectName(String name) {
+    public void setSelectName(String name, String id) {
         selectName = name;
+        selectID   = id;
     }
 
     /**
@@ -282,7 +283,7 @@ public class RegWithAndroidCameraActivity extends AppCompatActivity {
         for (FaceForReg faceForReg : faceForRegs) {
             try {
                 JSONObject object = new JSONObject();
-                object.put("userid", MyApplication.tempUserID);
+                object.put("userid", selectID);
                 object.put("fnote", faceForReg.feature);
                 peoplelist.put(object);
             } catch (JSONException e) {
