@@ -110,4 +110,11 @@ dependencies {
     
     //greendao
     implementation 'org.greenrobot:greendao:3.3.0' // add library
+
+    //glide图片加载
+    implementation 'com.github.bumptech.glide:glide:4.9.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.9.0'
+
+    //知乎：手机图片视频选择器
+    implementation 'com.zhihu.android:matisse:0.5.2-beta3'
 }

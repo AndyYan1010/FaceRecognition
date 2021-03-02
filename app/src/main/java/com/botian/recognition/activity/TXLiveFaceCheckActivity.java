@@ -1,9 +1,13 @@
 package com.botian.recognition.activity;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,10 +28,12 @@ import com.botian.recognition.bean.UpCheckResultBean;
 import com.botian.recognition.sdksupport.AIThreadPool;
 import com.botian.recognition.utils.NetUtil;
 import com.botian.recognition.utils.ProgressDialogUtil;
+import com.botian.recognition.utils.ToastDialogUtil;
 import com.botian.recognition.utils.ToastUtils;
 import com.botian.recognition.utils.netUtils.OkHttpUtils;
 import com.botian.recognition.utils.netUtils.RequestParamsFM;
 import com.google.gson.Gson;
+import com.tbruyelle.rxpermissions2.RxPermissions;
 import com.tencent.cloud.ai.fr.sdksupport.Auth;
 import com.tencent.cloud.ai.fr.utils.PermissionHandler;
 
@@ -41,12 +47,13 @@ import java.util.List;
 
 import okhttp3.Request;
 
+import static com.botian.recognition.utils.ToastDialogUtil.NORMOL_STYLE;
 import static com.tencent.cloud.ai.fr.sdksupport.Auth.authWithDeviceSn;
 
 public class TXLiveFaceCheckActivity extends BaseActivity implements View.OnClickListener {
-    private TextView                            tv_regist;
-    private TextView                            tv_regist_pic;
-    private TextView                            tv_upload;
+    private TextView tv_regist;
+    private TextView tv_regist_pic;
+    private TextView tv_upload;
     //private Spinner                             mPersonSpinner;
     //private SpPersonNameAdapter                 mSpAdapter;
     private List<PersonListResultBean.ListBean> mPersonList;
@@ -59,9 +66,9 @@ public class TXLiveFaceCheckActivity extends BaseActivity implements View.OnClic
     @Override
     protected void initView(Bundle savedInstanceState) {
         //mPersonSpinner = findViewById(R.id.spinner_list);
-        tv_regist     = findViewById(R.id.tv_regist);
+        tv_regist = findViewById(R.id.tv_regist);
         tv_regist_pic = findViewById(R.id.tv_regist_pic);
-        tv_upload     = findViewById(R.id.tv_upload);
+        tv_upload = findViewById(R.id.tv_upload);
     }
 
     @Override
@@ -152,7 +159,7 @@ public class TXLiveFaceCheckActivity extends BaseActivity implements View.OnClic
                     ToastUtils.showToast("网络请求错误，打卡记录提交失败！");
                     return;
                 }
-                Gson              gson       = new Gson();
+                Gson gson = new Gson();
                 UpCheckResultBean resultBean = gson.fromJson(resbody, UpCheckResultBean.class);
                 ToastUtils.showToast(resultBean.getMessage());
                 if ("1".equals(resultBean.getCode())) {
@@ -188,7 +195,7 @@ public class TXLiveFaceCheckActivity extends BaseActivity implements View.OnClic
                     ToastUtils.showToast("网络请求错误，人员列表获取失败！");
                     return;
                 }
-                Gson                 gson       = new Gson();
+                Gson gson = new Gson();
                 PersonListResultBean resultBean = gson.fromJson(resbody, PersonListResultBean.class);
                 ToastUtils.showToast(resultBean.getMessage());
                 if (!"1".equals(resultBean.getCode())) {
@@ -261,7 +268,7 @@ public class TXLiveFaceCheckActivity extends BaseActivity implements View.OnClic
 
     private Auth.AuthResult auth(Context context, String appId, String secretKey) {
         Auth.AuthResult authResult = authWithDeviceSn(context, appId, secretKey);
-        String          msg        = String.format("授权%s, appId=%s, %s", authResult.isSucceeded() ? "成功" : "失败", appId, authResult.toString());
+        String msg = String.format("授权%s, appId=%s, %s", authResult.isSucceeded() ? "成功" : "失败", appId, authResult.toString());
         showMessage(msg);
         return authResult;
     }
