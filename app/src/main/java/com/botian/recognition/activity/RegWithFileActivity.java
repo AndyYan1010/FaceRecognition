@@ -2,7 +2,6 @@ package com.botian.recognition.activity;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.net.Uri;
@@ -23,7 +22,6 @@ import com.botian.recognition.NetConfig;
 import com.botian.recognition.R;
 import com.botian.recognition.bean.CommonBean;
 import com.botian.recognition.bean.PersonListResultBean;
-import com.botian.recognition.sdksupport.AIThreadPool;
 import com.botian.recognition.sdksupport.AlignmentStep;
 import com.botian.recognition.sdksupport.ExtractFeatureStep;
 import com.botian.recognition.sdksupport.FaceForReg;
@@ -35,6 +33,7 @@ import com.botian.recognition.sdksupport.SaveFeaturesToFileStep;
 import com.botian.recognition.sdksupport.StuffBox;
 import com.botian.recognition.sdksupport.SyncJobBuilder;
 import com.botian.recognition.sdksupport.TrackStep;
+import com.botian.recognition.utils.CommonUtil;
 import com.botian.recognition.utils.ProgressDialogUtil;
 import com.botian.recognition.utils.ToastDialogUtil;
 import com.botian.recognition.utils.ToastUtils;
@@ -87,15 +86,15 @@ public class RegWithFileActivity extends AppCompatActivity implements View.OnCli
 
     private ImageView img_back;
     private ImageView img_face;
-    private EditText et_no;
-    private TextView tv_search;
-    private TextView tv_name;
-    private TextView tv_chose_face;
-    private TextView tv_regist;
-    public int VIDEOSHOOT_REQUEST_CHOOSE = 1006;//第三方图片视频选择
-    private int maxPicSize = 10;//单张图片大小
-    private String[] mListPermission = {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO};
-    private String personName, personID;
+    private EditText  et_no;
+    private TextView  tv_search;
+    private TextView  tv_name;
+    private TextView  tv_chose_face;
+    private TextView  tv_regist;
+    public  int       VIDEOSHOOT_REQUEST_CHOOSE = 1006;//第三方图片视频选择
+    private int       maxPicSize                = 10;//单张图片大小
+    private String[]  mListPermission           = {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO};
+    private String    personName, personID;
     private String filePath;
 
     @Override
@@ -114,13 +113,13 @@ public class RegWithFileActivity extends AppCompatActivity implements View.OnCli
     }
 
     private void initView() {
-        img_back = findViewById(R.id.img_back);
-        img_face = findViewById(R.id.img_face);
-        et_no = findViewById(R.id.et_no);
-        tv_search = findViewById(R.id.tv_search);
-        tv_name = findViewById(R.id.tv_name);
+        img_back      = findViewById(R.id.img_back);
+        img_face      = findViewById(R.id.img_face);
+        et_no         = findViewById(R.id.et_no);
+        tv_search     = findViewById(R.id.tv_search);
+        tv_name       = findViewById(R.id.tv_name);
         tv_chose_face = findViewById(R.id.tv_chose_face);
-        tv_regist = findViewById(R.id.tv_regist);
+        tv_regist     = findViewById(R.id.tv_regist);
 
         img_back.setOnClickListener(this);
         tv_search.setOnClickListener(this);
@@ -195,7 +194,7 @@ public class RegWithFileActivity extends AppCompatActivity implements View.OnCli
                     ToastUtils.showToast("网络请求错误，人员姓名查询失败！");
                     return;
                 }
-                Gson gson = new Gson();
+                Gson                 gson       = new Gson();
                 PersonListResultBean resultBean = gson.fromJson(resbody, PersonListResultBean.class);
                 ToastUtils.showToast(resultBean.getMessage());
                 if (!"1".equals(resultBean.getCode())) {
@@ -204,7 +203,7 @@ public class RegWithFileActivity extends AppCompatActivity implements View.OnCli
                 }
                 if (null != resultBean.getList() && resultBean.getList().size() > 0) {
                     personName = resultBean.getList().get(0).getFname();
-                    personID = resultBean.getList().get(0).getId();
+                    personID   = resultBean.getList().get(0).getId();
                     tv_name.setText(personName);
                 } else {
                     ToastUtils.showToast("网络请求错误，人员姓名查询失败！");
@@ -290,7 +289,7 @@ public class RegWithFileActivity extends AppCompatActivity implements View.OnCli
                 protected boolean onProcess(StuffBox stuffBox) {
                     //mViewController.drawLightThreadStuff(stuffBox);//显示人脸检测结果
                     Collection<TrackedFace> faces = stuffBox.find(TrackStep.OUT_COLOR_FACE);
-                    int size = faces.size();
+                    int                     size  = faces.size();
                     if (size != 1) {
                         String msg = "图片中" + (size == 0 ? "检测不到" : "多于一张") + "人脸, 无法注册: " + stuffBox.find(FileToFrameStep.IN_FILE).getName();
                         Log.w(TAG, msg);
@@ -307,7 +306,7 @@ public class RegWithFileActivity extends AppCompatActivity implements View.OnCli
                 protected boolean onProcess(StuffBox stuffBox) {
                     for (Entry<TrackedFace, String> entry : stuffBox.find(AlignmentStep.OUT_ALIGNMENT_FAILED_FACES).entrySet()) {
                         String frameName = stuffBox.find(PreprocessStep.IN_RAW_FRAME_GROUP).name;
-                        String msg = String.format("%s: Alignment 失败, msg:%s", frameName, entry.getValue());
+                        String msg       = String.format("%s: Alignment 失败, msg:%s", frameName, entry.getValue());
                         Log.i(TAG, msg);
                         ToastUtils.showToast(msg);
                         //mViewController.appendLogText(msg);
@@ -322,7 +321,7 @@ public class RegWithFileActivity extends AppCompatActivity implements View.OnCli
                 protected boolean onProcess(StuffBox stuffBox) {
                     for (Entry<TrackedFace, String> entry : stuffBox.find(QualityProStep.OUT_QUALITY_PRO_FAILED).entrySet()) {
                         String frameName = stuffBox.find(PreprocessStep.IN_RAW_FRAME_GROUP).name;
-                        String msg = String.format("%s: QualityPro 失败, msg:%s", frameName, entry.getValue());
+                        String msg       = String.format("%s: QualityPro 失败, msg:%s", frameName, entry.getValue());
                         Log.i(TAG, msg);
                         ToastUtils.showToast(msg);
                         //mViewController.appendLogText(msg);
@@ -356,8 +355,8 @@ public class RegWithFileActivity extends AppCompatActivity implements View.OnCli
 
                     Collection<FaceForReg> faces = new ArrayList<>(1);
                     for (Entry<TrackedFace, float[]> entry : features.entrySet()) {
-                        TrackedFace face = entry.getKey();
-                        float[] feature = entry.getValue();
+                        TrackedFace face    = entry.getKey();
+                        float[]     feature = entry.getValue();
 //                        String name = stuffBox.find(PreprocessStep.IN_RAW_FRAME_GROUP).name;//输入帧的名字(文件名)作为人名
                         String name = personName;
                         faces.add(new FaceForReg(face, name, feature));
@@ -386,7 +385,7 @@ public class RegWithFileActivity extends AppCompatActivity implements View.OnCli
         try {
             JSONObject object = new JSONObject();
             object.put("userid", personID);
-            object.put("fnote", feature);
+            object.put("fnote", CommonUtil.getFloatStr(feature));
             peoplelist.put(object);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -409,7 +408,7 @@ public class RegWithFileActivity extends AppCompatActivity implements View.OnCli
                     ToastUtils.showToast("网络请求错误，人脸特征值提交失败！");
                     return;
                 }
-                Gson gson = new Gson();
+                Gson       gson       = new Gson();
                 CommonBean commonBean = gson.fromJson(resbody, CommonBean.class);
                 ToastUtils.showToast(commonBean.getMessage());
                 if (!"1".equals(commonBean.getCode())) {
@@ -417,7 +416,7 @@ public class RegWithFileActivity extends AppCompatActivity implements View.OnCli
                     return;
                 }
                 personName = "";
-                personID = "";
+                personID   = "";
                 tv_name.setText(personName);
             }
         });
@@ -459,8 +458,8 @@ public class RegWithFileActivity extends AppCompatActivity implements View.OnCli
 
     private List<File> getFaceImageFiles() {
         List<File> outFiles = Collections.emptyList();
-        File dir = new File(FACE_IMG_DIR);
-        File[] files = dir.listFiles();
+        File       dir      = new File(FACE_IMG_DIR);
+        File[]     files    = dir.listFiles();
         if (files == null) {
             String msg = "目录里面没找到图片文件: " + dir.getAbsolutePath();
             Log.w(TAG, msg);

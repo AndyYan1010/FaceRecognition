@@ -1,13 +1,9 @@
 package com.botian.recognition.activity;
 
-import android.Manifest;
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,12 +24,10 @@ import com.botian.recognition.bean.UpCheckResultBean;
 import com.botian.recognition.sdksupport.AIThreadPool;
 import com.botian.recognition.utils.NetUtil;
 import com.botian.recognition.utils.ProgressDialogUtil;
-import com.botian.recognition.utils.ToastDialogUtil;
 import com.botian.recognition.utils.ToastUtils;
 import com.botian.recognition.utils.netUtils.OkHttpUtils;
 import com.botian.recognition.utils.netUtils.RequestParamsFM;
 import com.google.gson.Gson;
-import com.tbruyelle.rxpermissions2.RxPermissions;
 import com.tencent.cloud.ai.fr.sdksupport.Auth;
 import com.tencent.cloud.ai.fr.utils.PermissionHandler;
 
@@ -47,7 +41,6 @@ import java.util.List;
 
 import okhttp3.Request;
 
-import static com.botian.recognition.utils.ToastDialogUtil.NORMOL_STYLE;
 import static com.tencent.cloud.ai.fr.sdksupport.Auth.authWithDeviceSn;
 
 public class TXLiveFaceCheckActivity extends BaseActivity implements View.OnClickListener {
@@ -106,8 +99,8 @@ public class TXLiveFaceCheckActivity extends BaseActivity implements View.OnClic
                 startActivity(intent);
                 break;
             case R.id.tv_regist_pic:
-                Intent intentPic = new Intent(TXLiveFaceCheckActivity.this, RegWithFileActivity.class);
-                startActivity(intentPic);
+                //Intent intentPic = new Intent(TXLiveFaceCheckActivity.this, RegWithFileActivity.class);
+                //startActivity(intentPic);
                 break;
             case R.id.tv_upload:
                 //提交本地打卡信息

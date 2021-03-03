@@ -20,26 +20,40 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.android.jws.JwsIntents;
 import com.botian.recognition.activity.RetrieveWithAndroidCameraActivityOri;
 import com.botian.recognition.activity.TXLiveFaceCheckActivity;
+import com.botian.recognition.bean.FnoteListBean;
 import com.botian.recognition.sdksupport.AIThreadPool;
+import com.botian.recognition.utils.CommonUtil;
 import com.botian.recognition.utils.PhoneInfoUtil;
+import com.botian.recognition.utils.ProgressDialogUtil;
 import com.botian.recognition.utils.ToastDialogUtil;
 import com.botian.recognition.utils.ToastUtils;
 import com.botian.recognition.utils.devUtils.MyInfraredReceiver;
 import com.botian.recognition.utils.imageUtils.ShapeUtil;
+import com.botian.recognition.utils.netUtils.OkHttpUtils;
+import com.botian.recognition.utils.netUtils.ThreadUtils;
+import com.google.gson.Gson;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 import com.tencent.cloud.ai.fr.sdksupport.Auth;
+import com.tencent.cloud.ai.fr.sdksupport.FloatsFileHelper;
 import com.tencent.cloud.ai.fr.utils.PermissionHandler;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
+import okhttp3.Request;
 
+import static com.botian.recognition.sdksupport.SaveFeaturesToFileStep.FACE_LIB_PATH;
 import static com.botian.recognition.utils.ToastDialogUtil.NORMOL_STYLE;
 import static com.tencent.cloud.ai.fr.sdksupport.Auth.authWithDeviceSn;
 
 public class MainActivity2 extends AppCompatActivity implements View.OnClickListener {
+    @BindView(R.id.tv_title)
+    TextView  tv_title;
     @BindView(R.id.tv_DevID)
     TextView  tv_DevID;
     @BindView(R.id.tv_toWork)
@@ -77,6 +91,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnClickList
     }
 
     public void initListener() {
+        tv_title.setOnClickListener(this);
         tv_toWork.setOnClickListener(this);
         tv_offWork.setOnClickListener(this);
         img_logo.setOnClickListener(this);
@@ -85,6 +100,10 @@ public class MainActivity2 extends AppCompatActivity implements View.OnClickList
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
+            case R.id.tv_title:
+                //同步特征值
+                syncFaceValue();
+                break;
             case R.id.img_logo:
                 //跳转人脸特征值获取
                 step2GetFaceValue();
@@ -135,6 +154,63 @@ public class MainActivity2 extends AppCompatActivity implements View.OnClickList
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         mPermissionHandler.onRequestPermissionsResult(requestCode, permissions, grantResults);// 必须有这个调用, mPermissionHandler 才能正常工作
+    }
+
+    /***同步人脸特种值*/
+    private void syncFaceValue() {
+        ProgressDialogUtil.startShow(this, "正在同步人脸特征值信息...");
+        OkHttpUtils.getInstance().doGet(NetConfig.FNOTELIST, new OkHttpUtils.HttpCallBack() {
+            @Override
+            public void onError(Request request, IOException e) {
+                ProgressDialogUtil.hideDialog();
+                ToastUtils.showToast("网络错误，同步失败！");
+            }
+
+            @Override
+            public void onSuccess(int code, String resbody) {
+                if (code != 200) {
+                    ProgressDialogUtil.hideDialog();
+                    ToastUtils.showToast("网络请求错误，同步失败！");
+                    return;
+                }
+                Gson          gson       = new Gson();
+                FnoteListBean resultBean = gson.fromJson(resbody, FnoteListBean.class);
+                if (!"1".equals(resultBean.getCode())) {
+                    ProgressDialogUtil.hideDialog();
+                    ToastUtils.showToast("数据请求错误，同步失败！");
+                    return;
+                }
+                ToastUtils.showToast(resultBean.getMessage());
+                //存储人脸特征值
+                keepStoreFaceValue(resultBean.getList());
+            }
+        });
+    }
+
+    /***存储特征值
+     * @param list*/
+    private void keepStoreFaceValue(List<FnoteListBean.ListBean> list) {
+        if (null == list || list.size() == 0) {
+            ProgressDialogUtil.hideDialog();
+            return;
+        }
+        ProgressDialogUtil.startShow(this, "正在存储特征值");
+        ThreadUtils.runOnSubThread(new Runnable() {
+            @Override
+            public void run() {
+                for (FnoteListBean.ListBean bean : list) {
+                    String  filePath    = new File(FACE_LIB_PATH + bean.getId() + ".feature").getAbsolutePath();
+                    boolean writeResult = FloatsFileHelper.writeFloatsToFile(CommonUtil.getFloatArray(bean.getFnote()), filePath);
+                }
+                ThreadUtils.runOnMainThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        ProgressDialogUtil.hideDialog();
+                        ToastUtils.showToast("特征值存储成功");
+                    }
+                });
+            }
+        });
     }
 
     private MyInfraredReceiver mMyInfraredReceiver;

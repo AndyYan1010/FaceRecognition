@@ -34,7 +34,6 @@ import com.botian.recognition.utils.ToastUtils;
 import com.botian.recognition.utils.fileUtils.AudioUtil;
 import com.botian.recognition.utils.fileUtils.FileUtil;
 import com.botian.recognition.utils.mediaUtils.SoundMediaPlayerUtil;
-import com.botian.recognition.utils.mediaUtils.SoundUtil;
 import com.botian.recognition.utils.netUtils.OkHttpUtils;
 import com.botian.recognition.utils.netUtils.RequestParamsFM;
 import com.botian.recognition.utils.netUtils.ThreadUtils;
@@ -78,7 +77,7 @@ public class RetrieveWithAndroidCameraActivityOri extends AppCompatActivity {
         canGetFace          = true;
         isSubmitting        = false;
         AudioTimeUtil.getInstance().clearOldData();
-        
+
         AIThreadPool.instance().init(this);//重要!!
         // 恢复人脸库
         new AsyncJobBuilder(new StuffBox(), mRecoverFaceLibraryPipelineBuilder).synthesize(/*合成流水线任务*/).launch(/*执行任务*/);
@@ -284,13 +283,13 @@ public class RetrieveWithAndroidCameraActivityOri extends AppCompatActivity {
         canGetFace   = false;
         ProgressDialogUtil.startShow(this, "正在提交数据...");
         JSONArray peoplelist = new JSONArray();
-        for (String userName : mPersonDataList) {
+        for (String userID : mPersonDataList) {
             //剔除离开的人员
-            if (mLastPersonDataList.contains(userName)) {
+            if (mLastPersonDataList.contains(userID)) {
                 try {
                     JSONObject jsonObject = new JSONObject();
-                    jsonObject.put("userid", "1001");
-                    jsonObject.put("username", userName);
+                    jsonObject.put("userid", userID);
+                    //jsonObject.put("username", "");
                     jsonObject.put("type", getIntent().getIntExtra("checkType", 1));
                     jsonObject.put("ftime", TimeUtil.getNowDateAndTimeStr());
                     peoplelist.put(jsonObject);

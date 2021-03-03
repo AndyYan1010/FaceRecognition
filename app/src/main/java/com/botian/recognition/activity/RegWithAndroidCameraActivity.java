@@ -29,6 +29,7 @@ import com.botian.recognition.sdksupport.SaveFeaturesToFileStep;
 import com.botian.recognition.sdksupport.ShowCheckFaceDialogView;
 import com.botian.recognition.sdksupport.StuffBox;
 import com.botian.recognition.sdksupport.TrackStep;
+import com.botian.recognition.utils.CommonUtil;
 import com.botian.recognition.utils.ProgressDialogUtil;
 import com.botian.recognition.utils.ToastUtils;
 import com.botian.recognition.utils.netUtils.OkHttpUtils;
@@ -185,7 +186,7 @@ public class RegWithAndroidCameraActivity extends AppCompatActivity {
                         }
                     });
                     if (selectButton == 1) {
-                        faceForConfirm.name = selectName;
+                        faceForConfirm.name = selectID;
                         return true;// true: 确认注册此人脸
                     }
                     if (selectButton == 0) {
@@ -284,7 +285,7 @@ public class RegWithAndroidCameraActivity extends AppCompatActivity {
             try {
                 JSONObject object = new JSONObject();
                 object.put("userid", selectID);
-                object.put("fnote", faceForReg.feature);
+                object.put("fnote", CommonUtil.getFloatStr(faceForReg.feature));
                 peoplelist.put(object);
             } catch (JSONException e) {
                 e.printStackTrace();
