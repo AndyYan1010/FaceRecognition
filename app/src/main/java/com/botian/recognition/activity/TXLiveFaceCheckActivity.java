@@ -99,8 +99,8 @@ public class TXLiveFaceCheckActivity extends BaseActivity implements View.OnClic
                 startActivity(intent);
                 break;
             case R.id.tv_regist_pic:
-                //Intent intentPic = new Intent(TXLiveFaceCheckActivity.this, RegWithFileActivity.class);
-                //startActivity(intentPic);
+                Intent intentPic = new Intent(TXLiveFaceCheckActivity.this, RegWithFileActivity.class);
+                startActivity(intentPic);
                 break;
             case R.id.tv_upload:
                 //提交本地打卡信息
