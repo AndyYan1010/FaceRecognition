@@ -3,7 +3,6 @@ package com.botian.recognition.activity;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -14,7 +13,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -38,8 +36,6 @@ import com.botian.recognition.utils.ProgressDialogUtil;
 import com.botian.recognition.utils.ToastDialogUtil;
 import com.botian.recognition.utils.ToastUtils;
 import com.botian.recognition.utils.fileUtils.FileUtil;
-import com.botian.recognition.utils.imageUtils.FilePathUtil;
-import com.botian.recognition.utils.imageUtils.GifSizeFilter;
 import com.botian.recognition.utils.imageUtils.GlideLoaderUtil;
 import com.botian.recognition.utils.imageUtils.SelectImageEngine;
 import com.botian.recognition.utils.netUtils.OkHttpUtils;
@@ -52,8 +48,7 @@ import com.tencent.cloud.ai.fr.sdksupport.YTSDKManager;
 import com.tencent.youtu.YTFaceTracker.TrackedFace;
 import com.zhihu.matisse.Matisse;
 import com.zhihu.matisse.MimeType;
-import com.zhihu.matisse.filter.Filter;
-import com.zhihu.matisse.listener.OnSelectedListener;
+import com.zhihu.matisse.internal.entity.CaptureStrategy;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -196,12 +191,12 @@ public class RegWithFileActivity extends AppCompatActivity implements View.OnCli
                 }
                 Gson                 gson       = new Gson();
                 PersonListResultBean resultBean = gson.fromJson(resbody, PersonListResultBean.class);
-                ToastUtils.showToast(resultBean.getMessage());
                 if (!"1".equals(resultBean.getCode())) {
                     ToastUtils.showToast("姓名查询失败！");
                     return;
                 }
                 if (null != resultBean.getList() && resultBean.getList().size() > 0) {
+                    ToastUtils.showToast(resultBean.getMessage());
                     personName = resultBean.getList().get(0).getFname();
                     personID   = resultBean.getList().get(0).getId();
                     tv_name.setText(personName);
@@ -242,33 +237,35 @@ public class RegWithFileActivity extends AppCompatActivity implements View.OnCli
     /***打开图片选择器*/
     private void openPhonePics() {
         Matisse.from(this)
-                .choose(MimeType.ofImage())
+                .choose(MimeType.ofAll())
                 //有序选择图片 123456...
                 .countable(true)
                 //最大选择数量为9
                 .maxSelectable(1)
-                .addFilter(new GifSizeFilter(320, 320, 5 * Filter.K * Filter.K))
-                .gridExpectedSize(getResources().getDimensionPixelSize(R.dimen.grid_expected_size))
+                //.addFilter(new GifSizeFilter(320, 320, 5 * Filter.K * Filter.K))
                 //选择方向
-                .restrictOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED)
+                //.restrictOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED)
                 //界面中缩略图的质量
-                .thumbnailScale(0.85f)
+                //.thumbnailScale(0.85f)
                 //Glide加载方式
                 .imageEngine(new SelectImageEngine())
-//              .showPreview(false) // Default is `true`
-                .setOnSelectedListener(new OnSelectedListener() {
-                    @Override
-                    public void onSelected(@NonNull List<Uri> uriList, @NonNull List<String> pathList) {
-                        if (null != uriList && uriList.size() > 0) {
-                            double fileSize = FilePathUtil.getFileSize(FilePathUtil.getRealFilePath(RegWithFileActivity.this, uriList.get(0)), FilePathUtil.RESULT_MB);
-                            if (fileSize >= maxPicSize) {
-                                ToastUtils.showToast("图片大小不能超过" + maxPicSize + "M");
-                            }
-                        } else {
-                            ToastUtils.showToast("未获取到图片！");
-                        }
-                    }
-                })
+                //是否提供拍照功能
+                .capture(true)
+                //存储到哪里
+                .captureStrategy(new CaptureStrategy(true, "com.botian.recognition.fileprovider"))
+//              .setOnSelectedListener(new OnSelectedListener() {
+//                    @Override
+//                    public void onSelected(@NonNull List<Uri> uriList, @NonNull List<String> pathList) {
+//                        if (null != uriList && uriList.size() > 0) {
+//                            double fileSize = FilePathUtil.getFileSize(FilePathUtil.getRealFilePath(RegWithFileActivity.this, uriList.get(0)), FilePathUtil.RESULT_MB);
+//                            if (fileSize >= maxPicSize) {
+//                                ToastUtils.showToast("图片大小不能超过" + maxPicSize + "M");
+//                            }
+//                        } else {
+//                            ToastUtils.showToast("未获取到图片！");
+//                        }
+//                    }
+//                })
                 .theme(R.style.Matisse_Dracula)
                 .forResult(VIDEOSHOOT_REQUEST_CHOOSE);
     }

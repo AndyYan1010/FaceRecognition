@@ -49,7 +49,8 @@ public class GlideLoaderUtil {
         Glide.with(context)
                 .load(url)// 加载图片
                 .apply(requestOptions)
-                .transition(DrawableTransitionOptions.withCrossFade())
+                //.transition(DrawableTransitionOptions.withCrossFade())
+                //.dontAnimate()
                 .into(imageview);
     }
 
