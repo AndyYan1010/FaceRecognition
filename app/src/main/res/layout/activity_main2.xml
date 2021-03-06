@@ -8,6 +8,39 @@
 
     <include layout="@layout/action_title" />
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp">
+
+        <TextView
+            android:id="@+id/tv_sync"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:background="@drawable/bg_normol_1"
+            android:gravity="center_horizontal"
+            android:padding="5dp"
+            android:text="同步\n特征值"
+            android:textColor="@color/black"
+            android:textSize="@dimen/sp_16" />
+
+        <TextView
+            android:id="@+id/tv_led"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/bg_normol_1"
+            android:gravity="center_horizontal"
+            android:padding="5dp"
+            android:text="打开/关闭\n自动感应"
+            android:textColor="@color/black"
+            android:textSize="@dimen/sp_16" />
+    </RelativeLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
