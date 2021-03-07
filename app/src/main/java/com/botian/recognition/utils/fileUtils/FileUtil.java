@@ -1,12 +1,29 @@
 package com.botian.recognition.utils.fileUtils;
 
+import android.app.Activity;
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Build;
+import android.os.Environment;
+import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.text.TextUtils;
+import android.util.Log;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+import static com.zhihu.matisse.internal.utils.PathUtils.getDataColumn;
+import static com.zhihu.matisse.internal.utils.PathUtils.isDownloadsDocument;
+import static com.zhihu.matisse.internal.utils.PathUtils.isExternalStorageDocument;
+import static com.zhihu.matisse.internal.utils.PathUtils.isMediaDocument;
 
 public class FileUtil {
 
@@ -35,26 +52,72 @@ public class FileUtil {
 
     /***根据uri获取文件本地路径*/
     public static String getFilePathFromUri(Context context, Uri uri) {
+        //专属 Matisse  uri 路径解析
         if (null == uri) return null;
         final String scheme = uri.getScheme();
-        String data = null;
+        String realPath = null;
         if (scheme == null)
-            data = uri.getPath();
+            realPath = uri.getPath();
         else if (ContentResolver.SCHEME_FILE.equals(scheme)) {
-            data = uri.getPath();
+            realPath = uri.getPath();
         } else if (ContentResolver.SCHEME_CONTENT.equals(scheme)) {
-            Cursor cursor = context.getContentResolver().query(uri, new String[]{MediaStore.Images.ImageColumns
-                    .DATA}, null, null, null);
+            Cursor cursor = context.getContentResolver().query(uri,
+                    new String[]{MediaStore.Images.ImageColumns.DATA},
+                    null, null, null);
             if (null != cursor) {
                 if (cursor.moveToFirst()) {
                     int index = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
                     if (index > -1) {
-                        data = cursor.getString(index);
+                        realPath = cursor.getString(index);
                     }
                 }
                 cursor.close();
             }
         }
-        return data;
+        if (TextUtils.isEmpty(realPath)) {
+            if (uri != null) {
+                String uriString = uri.toString();
+                int index = uriString.lastIndexOf("/");
+                String imageName = uriString.substring(index);
+                File storageDir;
+
+                storageDir = Environment.getExternalStoragePublicDirectory(
+                        Environment.DIRECTORY_PICTURES);
+                File file = new File(storageDir, imageName);
+                if (file.exists()) {
+                    realPath = file.getAbsolutePath();
+                } else {
+                    storageDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+                    File file1 = new File(storageDir, imageName);
+                    realPath = file1.getAbsolutePath();
+                }
+            }
+        }
+        return realPath;
+    }
+
+    /**
+     * 保存图片并发送广播通知数据库刷新，只有这样才能在相册里面看到这张照片
+     *
+     * @param bitmap
+     */
+    public static void saveBitmapFile(Activity activity, Bitmap bitmap, String filePath) {
+        //将要保存图片的路径
+        existOrCreateFolder(filePath);
+        File file = new File(filePath + "temp" + System.currentTimeMillis() + ".jpg");
+        try {
+            BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bos);
+            bos.flush();
+            bos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        //发送广播给系统，刷新数据库
+        Uri uri = Uri.fromFile(file);
+        System.out.println("imageUri------>" + uri);
+        //imageUri------>file:///storage/emulated/0/MyAndroidBase/mybase/1574394370534.jpg
+        Intent localIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, uri);
+        activity.sendBroadcast(localIntent);
     }
 }

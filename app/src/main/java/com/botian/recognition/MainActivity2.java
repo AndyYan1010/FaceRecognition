@@ -25,6 +25,7 @@ import com.botian.recognition.sdksupport.AIThreadPool;
 import com.botian.recognition.utils.CommonUtil;
 import com.botian.recognition.utils.PhoneInfoUtil;
 import com.botian.recognition.utils.ProgressDialogUtil;
+import com.botian.recognition.utils.SyncFaceValueUtil;
 import com.botian.recognition.utils.ToastDialogUtil;
 import com.botian.recognition.utils.ToastUtils;
 import com.botian.recognition.utils.devUtils.MyInfraredReceiver;
@@ -92,6 +93,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnClickList
     public void initData() {
         //获取硬件信息
         getDevInfo();
+        SyncFaceValueUtil.startSyncValue(this);
     }
 
     public void initListener() {
@@ -239,14 +241,14 @@ public class MainActivity2 extends AppCompatActivity implements View.OnClickList
     private void setInfra_redWithLED() {
         mMyInfraredReceiver = new MyInfraredReceiver();
         IntentFilter intentFilter = new IntentFilter(JwsIntents.REQUEST_RESPONSE_IR_STATE_ACTION);
-        //MyApplication.getJwsManager().jwsRegisterIRListener();
+//        MyApplication.getJwsManager().jwsRegisterIRListener();
         registerReceiver(mMyInfraredReceiver, intentFilter);
     }
 
     /***关闭红外*/
     public void closeInfraredAndLED() {
         if (mMyInfraredReceiver != null) {
-            //MyApplication.getJwsManager().jwsUnregisterIRListener();
+//            MyApplication.getJwsManager().jwsUnregisterIRListener();
             unregisterReceiver(mMyInfraredReceiver);
             mMyInfraredReceiver = null;
         }
