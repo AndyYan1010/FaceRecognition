@@ -2,28 +2,22 @@ package com.botian.recognition.utils.fileUtils;
 
 import android.app.Activity;
 import android.content.ContentResolver;
-import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Environment;
-import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.text.TextUtils;
-import android.util.Log;
+
+import com.botian.recognition.utils.ToastUtils;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import static com.zhihu.matisse.internal.utils.PathUtils.getDataColumn;
-import static com.zhihu.matisse.internal.utils.PathUtils.isDownloadsDocument;
-import static com.zhihu.matisse.internal.utils.PathUtils.isExternalStorageDocument;
-import static com.zhihu.matisse.internal.utils.PathUtils.isMediaDocument;
 
 public class FileUtil {
 
@@ -37,6 +31,17 @@ public class FileUtil {
             folder.mkdirs();
         }
         //文件夹已存在
+    }
+
+    /***判断文件是否存在*/
+    public static boolean existFolder(String filePath) {
+        if (null == filePath || "".equals(filePath))
+            return false;
+        File file = new File(filePath);
+        if (!file.exists()) {
+            return false;
+        }
+        return true;
     }
 
     /***

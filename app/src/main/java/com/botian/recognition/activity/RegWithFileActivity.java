@@ -154,17 +154,12 @@ public class RegWithFileActivity extends AppCompatActivity implements View.OnCli
                     ToastUtils.showToast("请输入工号，然后搜索姓名。");
                     return;
                 }
-                if (null == filePath || "".equals(filePath)) {
-                    ToastUtils.showToast("请选择正确的照片");
-                    return;
-                }
-                File file = new File(filePath);
-                if (!file.exists()) {
+                if (!FileUtil.existFolder(filePath)) {
                     ToastUtils.showToast("照片打开失败!");
                     return;
                 }
                 //提取人脸特征值
-                getFaceValue(file);
+                getFaceValue(new File(filePath));
                 break;
         }
     }
@@ -179,6 +174,10 @@ public class RegWithFileActivity extends AppCompatActivity implements View.OnCli
                 return;
             }
             filePath = FileUtil.getFilePathFromUri(RegWithFileActivity.this, uris.get(0));
+            if (!FileUtil.existFolder(filePath)) {
+                ToastUtils.showToast("照片打开失败!");
+                return;
+            }
             tv_name.setText(filePath);
 //            GlideLoaderUtil.showImageView(this, uris.get(0), img_face);
             GlideLoaderUtil.showImageView(this, filePath, img_face);
@@ -310,8 +309,8 @@ public class RegWithFileActivity extends AppCompatActivity implements View.OnCli
                     if (size != 1) {
                         String msg = "图片中" + (size == 0 ? "检测不到" : "多于一张") + "人脸, 无法注册: " + stuffBox.find(FileToFrameStep.IN_FILE).getName();
                         Log.w(TAG, msg);
-                        ToastUtils.showToast(msg);
                         ProgressDialogUtil.hideDialog();
+                        ToastUtils.showToast(msg);
                         //mViewController.appendLogText(msg);
                         return false;
                     }
@@ -326,11 +325,10 @@ public class RegWithFileActivity extends AppCompatActivity implements View.OnCli
                         String frameName = stuffBox.find(PreprocessStep.IN_RAW_FRAME_GROUP).name;
                         String msg = String.format("%s: Alignment 失败, msg:%s", frameName, entry.getValue());
                         Log.i(TAG, msg);
-                        ToastUtils.showToast(msg);
                         ProgressDialogUtil.hideDialog();
+                        ToastUtils.showToast(msg);
                         //mViewController.appendLogText(msg);
                     }
-
                     return stuffBox.find(AlignmentStep.OUT_ALIGNMENT_OK_FACES).size() > 0;//符合条件的人脸大于0才继续
                 }
             })
@@ -343,10 +341,8 @@ public class RegWithFileActivity extends AppCompatActivity implements View.OnCli
                         String msg = String.format("%s: QualityPro 失败, msg:%s", frameName, entry.getValue());
                         Log.i(TAG, msg);
                         ToastUtils.showToast(msg);
-                        ProgressDialogUtil.hideDialog();
                         //mViewController.appendLogText(msg);
                     }
-
                     return stuffBox.find(QualityProStep.OUT_QUALITY_PRO_OK).size() > 0;//符合条件的人脸大于0才继续
                 }
             })
@@ -356,13 +352,14 @@ public class RegWithFileActivity extends AppCompatActivity implements View.OnCli
                 protected boolean onProcess(StuffBox stuffBox) {
                     Map<TrackedFace, float[]> features = stuffBox.find(ExtractFeatureStep.OUT_FACE_FEATURES);
                     if (features.size() > 1) {
+                        ProgressDialogUtil.hideDialog();
                         //如果这里触发了, 说明前面的步骤检查失效, 请检查流水线改动
                         throw new IllegalArgumentException("图中多于一张人脸, 无法注册: " + stuffBox.find(FileToFrameStep.IN_FILE).getName());
                     } else if (features.size() == 0) {
                         String msg = "图片提取人脸特征失败, 无法注册: " + stuffBox.find(FileToFrameStep.IN_FILE).getName();
                         Log.w(TAG, msg);
-                        ToastUtils.showToast(msg);
                         ProgressDialogUtil.hideDialog();
+                        ToastUtils.showToast(msg);
                         //mViewController.appendLogText(msg);
                         return false;
                     }
@@ -373,7 +370,6 @@ public class RegWithFileActivity extends AppCompatActivity implements View.OnCli
                 @Override
                 public Collection<FaceForReg> onGetInput(StuffBox stuffBox) {
                     Map<TrackedFace, float[]> features = stuffBox.find(ExtractFeatureStep.OUT_FACE_FEATURES);
-
                     Collection<FaceForReg> faces = new ArrayList<>(1);
                     for (Entry<TrackedFace, float[]> entry : features.entrySet()) {
                         TrackedFace face = entry.getKey();
