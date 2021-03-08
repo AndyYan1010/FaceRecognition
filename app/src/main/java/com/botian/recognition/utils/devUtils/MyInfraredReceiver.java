@@ -22,7 +22,8 @@ public class MyInfraredReceiver extends BroadcastReceiver {
         boolean state = intent.getBooleanExtra(JwsIntents.EXTRA_IR_STATE_RESPONSE, false);
         Log.i("byf-infraed", "onReceive: intent " + "object  " + object + "state " + state);
         if (state) {
-            WindowManagerUtil.wakeWindow();
+//            WindowManagerUtil.wakeWindow();
+            WindowManagerUtil.wakeWindowV2();
             MyApplication.getJwsManager().jwsOpenLED();
         } else {
             MyApplication.getJwsManager().jwsCloseLED();

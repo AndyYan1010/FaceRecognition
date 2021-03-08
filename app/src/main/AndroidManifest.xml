@@ -3,6 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.botian.recognition">
 
+    <uses-feature
+        android:name="android.hardware.usb.host"
+        android:required="true" />
+
     <!--android:sharedUserId="android.uid.system"-->
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -39,6 +43,7 @@
         android:required="true" />
     <!--录音-->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
 
     <!--   jawestshow 权限 -->
     <uses-feature
@@ -126,6 +131,7 @@
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustUnspecified|stateHidden" />
 
+        <receiver android:name=".utils.devUtils.MyInfraredReceiver" />
         <!--其他的配置项-->
         <provider
             android:name="androidx.core.content.FileProvider"

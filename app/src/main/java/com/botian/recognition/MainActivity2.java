@@ -54,18 +54,23 @@ import static com.tencent.cloud.ai.fr.sdksupport.Auth.authWithDeviceSn;
 
 public class MainActivity2 extends AppCompatActivity implements View.OnClickListener {
     @BindView(R.id.tv_title)
-    TextView  tv_title;
+    TextView tv_title;
     @BindView(R.id.tv_DevID)
-    TextView  tv_DevID;
+    TextView tv_DevID;
+    @BindView(R.id.tv_sync)
+    TextView tv_sync;
+    @BindView(R.id.tv_led)
+    TextView tv_led;
     @BindView(R.id.tv_toWork)
-    TextView  tv_toWork;
+    TextView tv_toWork;
     @BindView(R.id.tv_offWork)
-    TextView  tv_offWork;
+    TextView tv_offWork;
     @BindView(R.id.img_logo)
     ImageView img_logo;
 
+    private boolean isOpenAutoLED = false;
     private Unbinder unBinder;
-    private int      REQUEST_CODE_GET_FACE = 10001;
+    private int REQUEST_CODE_GET_FACE = 10001;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -87,12 +92,13 @@ public class MainActivity2 extends AppCompatActivity implements View.OnClickList
     public void initData() {
         //获取硬件信息
         getDevInfo();
-        //设置红外感应，有人时打开led灯
-        setInfra_redWithLED();
+        SyncFaceValueUtil.startSyncValue(this);
     }
 
     public void initListener() {
         tv_title.setOnClickListener(this);
+        tv_sync.setOnClickListener(this);
+        tv_led.setOnClickListener(this);
         tv_toWork.setOnClickListener(this);
         tv_offWork.setOnClickListener(this);
         img_logo.setOnClickListener(this);
@@ -103,11 +109,25 @@ public class MainActivity2 extends AppCompatActivity implements View.OnClickList
         switch (view.getId()) {
             case R.id.tv_title:
                 //同步特征值
-                syncFaceValue();
+//                syncFaceValue();
                 break;
             case R.id.img_logo:
                 //跳转人脸特征值获取
                 step2GetFaceValue();
+                break;
+            case R.id.tv_sync:
+                //同步特征值
+                syncFaceValue();
+                break;
+            case R.id.tv_led:
+                if (!isOpenAutoLED) {
+                    //设置红外感应，有人时打开led灯
+                    setInfra_redWithLED();
+                    isOpenAutoLED = true;
+                } else {
+                    closeInfraredAndLED();
+                    isOpenAutoLED = false;
+                }
                 break;
             case R.id.tv_toWork:
                 //上班
@@ -174,7 +194,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnClickList
                     ToastUtils.showToast("网络请求错误，同步失败！");
                     return;
                 }
-                Gson          gson       = new Gson();
+                Gson gson = new Gson();
                 FnoteListBean resultBean = gson.fromJson(resbody, FnoteListBean.class);
                 if (!"1".equals(resultBean.getCode())) {
                     ProgressDialogUtil.hideDialog();
@@ -200,7 +220,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnClickList
             @Override
             public void run() {
                 for (FnoteListBean.ListBean bean : list) {
-                    String  filePath    = new File(FACE_LIB_PATH + bean.getId() + ".feature").getAbsolutePath();
+                    String filePath = new File(FACE_LIB_PATH + bean.getId() + ".feature").getAbsolutePath();
                     boolean writeResult = FloatsFileHelper.writeFloatsToFile(CommonUtil.getFloatArray(bean.getFnote()), filePath);
                 }
                 ThreadUtils.runOnMainThread(new Runnable() {
@@ -220,14 +240,14 @@ public class MainActivity2 extends AppCompatActivity implements View.OnClickList
     private void setInfra_redWithLED() {
         mMyInfraredReceiver = new MyInfraredReceiver();
         IntentFilter intentFilter = new IntentFilter(JwsIntents.REQUEST_RESPONSE_IR_STATE_ACTION);
-        MyApplication.getJwsManager().jwsRegisterIRListener();
+//        MyApplication.getJwsManager().jwsRegisterIRListener();
         registerReceiver(mMyInfraredReceiver, intentFilter);
     }
 
     /***关闭红外*/
     public void closeInfraredAndLED() {
         if (mMyInfraredReceiver != null) {
-            MyApplication.getJwsManager().jwsUnregisterIRListener();
+//            MyApplication.getJwsManager().jwsUnregisterIRListener();
             unregisterReceiver(mMyInfraredReceiver);
             mMyInfraredReceiver = null;
         }
@@ -277,7 +297,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnClickList
 
     private Auth.AuthResult auth(Context context, String appId, String secretKey) {
         Auth.AuthResult authResult = authWithDeviceSn(context, appId, secretKey);
-        String          msg        = String.format("授权%s, appId=%s, %s", authResult.isSucceeded() ? "成功" : "失败", appId, authResult.toString());
+        String msg = String.format("授权%s, appId=%s, %s", authResult.isSucceeded() ? "成功" : "失败", appId, authResult.toString());
         ToastUtils.showToast(msg);
         return authResult;
     }

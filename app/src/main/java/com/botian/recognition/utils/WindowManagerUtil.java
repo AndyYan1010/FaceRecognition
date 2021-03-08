@@ -2,6 +2,7 @@ package com.botian.recognition.utils;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.KeyguardManager;
 import android.content.Context;
 import android.os.PowerManager;
 import android.util.Log;
@@ -22,6 +23,19 @@ public class WindowManagerUtil {
         //释放
         wl.release();
         Log.e("xxx", "wake");
+    }
+
+    public static void wakeWindowV2() {
+        KeyguardManager km = (KeyguardManager) MyApplication.applicationContext.getSystemService(Context.KEYGUARD_SERVICE);// 得到键盘锁管理器
+        KeyguardManager.KeyguardLock kl = km.newKeyguardLock("unLock");
+        kl.disableKeyguard(); // 解锁
+        PowerManager pm = (PowerManager) MyApplication.applicationContext.getSystemService(Context.POWER_SERVICE);
+        // 点亮屏幕
+        @SuppressLint("InvalidWakeLockTag") PowerManager.WakeLock pm_wl = pm.newWakeLock(
+                PowerManager.ACQUIRE_CAUSES_WAKEUP
+                        | PowerManager.SCREEN_DIM_WAKE_LOCK, "bright");
+        pm_wl.acquire();
+        pm_wl.release();//发出命令
     }
 
     //覆盖息屏页面，在需要跳转的activity中添加
