@@ -40,7 +40,8 @@ public class SaveFeaturesToFileStep extends AbsStep<StuffBox> {
             FloatsFileHelper.writeFloatsToFile(faceForReg.feature, filePath);
         }
         //保存人脸特征值后，返回信息，给进一步操作
-        mInputProvider.onFileSavedResult(faceForRegs);
+        if (null != mInputProvider)
+            mInputProvider.onFileSavedResult(faceForRegs);
         return true;
     }
 

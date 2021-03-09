@@ -28,7 +28,7 @@ public class MyApplication extends Application {
     public static String workGongXu;//班线工序
     public static int flag = -1;//判断是否被回收
     public static boolean flagScreen = false;//是否是竖屏设备
-    public static boolean isOpenTX = false;//设备是否注册腾讯人脸sdk
+    public static boolean isOpenTX = true;//设备是否注册腾讯人脸sdk
 
 
     @Override
