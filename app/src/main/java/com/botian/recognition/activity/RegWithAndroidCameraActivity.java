@@ -64,6 +64,7 @@ public class RegWithAndroidCameraActivity extends AppCompatActivity {
     public  int                                 selectButton = -1;//
     public  String                              selectName   = "";//
     public  String                              selectID     = "";//
+    private boolean                             isUpDateFace = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -177,7 +178,7 @@ public class RegWithAndroidCameraActivity extends AppCompatActivity {
                         @Override
                         public void run() {
                             ShowCheckFaceDialogView faceDialogView = null;
-                            if (!isShowDialog && selectButton != 0) {
+                            if (!isShowDialog && selectButton != 0 && !isUpDateFace) {
                                 faceDialogView = new ShowCheckFaceDialogView();
                                 faceDialogView.initView(RegWithAndroidCameraActivity.this);
                                 faceDialogView.setViewCont(faceForConfirm.faceBmp, mPersonList);
@@ -187,6 +188,7 @@ public class RegWithAndroidCameraActivity extends AppCompatActivity {
                     });
                     if (selectButton == 1) {
                         faceForConfirm.name = selectID;
+                        isUpDateFace        = true;
                         return true;// true: 确认注册此人脸
                     }
                     if (selectButton == 0) {
@@ -299,6 +301,7 @@ public class RegWithAndroidCameraActivity extends AppCompatActivity {
             public void onError(Request request, IOException e) {
                 ProgressDialogUtil.hideDialog();
                 ToastUtils.showToast("人脸特征值提交失败！");
+                isUpDateFace = false;
             }
 
             @Override
@@ -307,6 +310,7 @@ public class RegWithAndroidCameraActivity extends AppCompatActivity {
                 System.out.println("提交返回信息：" + resbody);
                 if (code != 200) {
                     ToastUtils.showToast("网络请求错误，人脸特征值提交失败！");
+                    isUpDateFace = false;
                     return;
                 }
                 Gson       gson       = new Gson();
