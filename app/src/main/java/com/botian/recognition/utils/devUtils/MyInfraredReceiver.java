@@ -8,7 +8,6 @@ import android.util.Log;
 
 import com.android.jws.JwsIntents;
 import com.botian.recognition.MyApplication;
-import com.botian.recognition.utils.WindowManagerUtil;
 
 public class MyInfraredReceiver extends BroadcastReceiver {
     private Object object;
@@ -23,10 +22,12 @@ public class MyInfraredReceiver extends BroadcastReceiver {
         Log.i("byf-infraed", "onReceive: intent " + "object  " + object + "state " + state);
         if (state) {
 //            WindowManagerUtil.wakeWindow();
-            WindowManagerUtil.wakeWindowV2();
+//            WindowManagerUtil.wakeWindowV2();
             MyApplication.getJwsManager().jwsOpenLED();
+            MyApplication.getJwsManager().jwsSetLcdBackLight(1);
         } else {
             MyApplication.getJwsManager().jwsCloseLED();
+            MyApplication.getJwsManager().jwsSetLcdBackLight(0);
         }
     }
 }
