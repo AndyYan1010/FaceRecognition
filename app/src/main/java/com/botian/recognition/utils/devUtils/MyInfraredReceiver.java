@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 
 import com.android.jws.JwsIntents;
@@ -11,6 +12,12 @@ import com.botian.recognition.MyApplication;
 
 public class MyInfraredReceiver extends BroadcastReceiver {
     private Object object;
+
+    private Handler handler;
+
+    public MyInfraredReceiver(Handler handler) {
+        this.handler = handler;
+    }
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -25,9 +32,18 @@ public class MyInfraredReceiver extends BroadcastReceiver {
 //            WindowManagerUtil.wakeWindowV2();
             MyApplication.getJwsManager().jwsOpenLED();
             MyApplication.getJwsManager().jwsSetLcdBackLight(1);
+            if (null != handler)
+                handler.removeCallbacksAndMessages(null);
         } else {
             MyApplication.getJwsManager().jwsCloseLED();
-            MyApplication.getJwsManager().jwsSetLcdBackLight(0);
+            //延迟关闭灯
+            if (null != handler)
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        MyApplication.getJwsManager().jwsSetLcdBackLight(0);
+                    }
+                }, 1000 * 60 * 5);
         }
     }
 }

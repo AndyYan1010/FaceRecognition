@@ -46,6 +46,7 @@
                 android:layout_weight="1"
                 android:gravity="bottom"
                 android:hint="请输入工号"
+                android:inputType="number"
                 android:maxLines="1"
                 android:minHeight="80dp"
                 android:textSize="20dp"

@@ -38,6 +38,7 @@
         android:background="@drawable/bg_round_corner_white"
         android:gravity="center"
         android:hint="请输入工号"
+        android:inputType="number"
         android:maxLines="1"
         android:minHeight="40dp"
         android:paddingLeft="15dp"

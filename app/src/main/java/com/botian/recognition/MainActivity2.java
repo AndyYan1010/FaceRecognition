@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.Settings;
 import android.view.View;
 import android.widget.ImageView;
@@ -55,23 +56,24 @@ import static com.tencent.cloud.ai.fr.sdksupport.Auth.authWithDeviceSn;
 
 public class MainActivity2 extends AppCompatActivity implements View.OnClickListener {
     @BindView(R.id.tv_title)
-    TextView tv_title;
+    TextView  tv_title;
     @BindView(R.id.tv_DevID)
-    TextView tv_DevID;
+    TextView  tv_DevID;
     @BindView(R.id.tv_sync)
-    TextView tv_sync;
+    TextView  tv_sync;
     @BindView(R.id.tv_led)
-    TextView tv_led;
+    TextView  tv_led;
     @BindView(R.id.tv_toWork)
-    TextView tv_toWork;
+    TextView  tv_toWork;
     @BindView(R.id.tv_offWork)
-    TextView tv_offWork;
+    TextView  tv_offWork;
     @BindView(R.id.img_logo)
     ImageView img_logo;
 
-    private boolean isOpenAutoLED = false;
+    private boolean  isOpenAutoLED         = false;
     private Unbinder unBinder;
-    private int REQUEST_CODE_GET_FACE = 10001;
+    private int      REQUEST_CODE_GET_FACE = 10001;
+    private Handler  mHandler;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -93,7 +95,10 @@ public class MainActivity2 extends AppCompatActivity implements View.OnClickList
     public void initData() {
         //获取硬件信息
         getDevInfo();
+        //开启同步注册信息功能，每天凌晨4点更新
         SyncFaceValueUtil.startSyncValue(this);
+        //打开（或关闭）红外感应
+        changeLEDListener();
     }
 
     public void initListener() {
@@ -121,14 +126,8 @@ public class MainActivity2 extends AppCompatActivity implements View.OnClickList
                 syncFaceValue();
                 break;
             case R.id.tv_led:
-                if (!isOpenAutoLED) {
-                    //设置红外感应，有人时打开led灯
-                    setInfra_redWithLED();
-                    isOpenAutoLED = true;
-                } else {
-                    closeInfraredAndLED();
-                    isOpenAutoLED = false;
-                }
+                //打开（或关闭）红外感应
+                changeLEDListener();
                 break;
             case R.id.tv_toWork:
                 //上班
@@ -148,12 +147,6 @@ public class MainActivity2 extends AppCompatActivity implements View.OnClickList
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        //MyApplication.getJwsManager().jwsCloseLED();
-    }
-
-    @Override
     protected void onDestroy() {
         super.onDestroy();
         //解除注解
@@ -161,6 +154,10 @@ public class MainActivity2 extends AppCompatActivity implements View.OnClickList
             unBinder.unbind();
         }
         closeInfraredAndLED();
+        if (null != mHandler) {
+            mHandler.removeCallbacksAndMessages(null);
+            mHandler = null;
+        }
         MyApplication.listActivity.remove(this);
     }
 
@@ -176,6 +173,26 @@ public class MainActivity2 extends AppCompatActivity implements View.OnClickList
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         mPermissionHandler.onRequestPermissionsResult(requestCode, permissions, grantResults);// 必须有这个调用, mPermissionHandler 才能正常工作
+    }
+
+    private void changeLEDListener() {
+        if (!isOpenAutoLED) {
+            //设置红外感应，有人时打开led灯
+            setInfra_redWithLED();
+            isOpenAutoLED = true;
+        } else {
+            closeInfraredAndLED();
+            isOpenAutoLED = false;
+        }
+    }
+
+    private void askRightForSDK() {
+        try {
+            mPermissionHandler.start();// 先申请系统权限
+        } catch (PermissionHandler.GetPermissionsException e) {
+            e.printStackTrace();
+            Toast.makeText(this, "GetPermissionsException: " + e.toString(), Toast.LENGTH_SHORT).show();
+        }
     }
 
     /***同步人脸特种值*/
@@ -195,7 +212,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnClickList
                     ToastUtils.showToast("网络请求错误，同步失败！");
                     return;
                 }
-                Gson gson = new Gson();
+                Gson          gson       = new Gson();
                 FnoteListBean resultBean = gson.fromJson(resbody, FnoteListBean.class);
                 if (!"1".equals(resultBean.getCode())) {
                     ProgressDialogUtil.hideDialog();
@@ -221,7 +238,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnClickList
             @Override
             public void run() {
                 for (FnoteListBean.ListBean bean : list) {
-                    String filePath = new File(FACE_LIB_PATH + bean.getId() + ".feature").getAbsolutePath();
+                    String  filePath    = new File(FACE_LIB_PATH + bean.getId() + ".feature").getAbsolutePath();
                     boolean writeResult = FloatsFileHelper.writeFloatsToFile(CommonUtil.getFloatArray(bean.getFnote()), filePath);
                 }
                 ThreadUtils.runOnMainThread(new Runnable() {
@@ -239,7 +256,8 @@ public class MainActivity2 extends AppCompatActivity implements View.OnClickList
 
     /***设置红外感应*/
     private void setInfra_redWithLED() {
-        mMyInfraredReceiver = new MyInfraredReceiver();
+        mHandler            = new Handler();
+        mMyInfraredReceiver = new MyInfraredReceiver(mHandler);
         IntentFilter intentFilter = new IntentFilter(JwsIntents.REQUEST_RESPONSE_IR_STATE_ACTION);
         MyApplication.getJwsManager().jwsRegisterIRListener();
         registerReceiver(mMyInfraredReceiver, intentFilter);
@@ -298,7 +316,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnClickList
 
     private Auth.AuthResult auth(Context context, String appId, String secretKey) {
         Auth.AuthResult authResult = authWithDeviceSn(context, appId, secretKey);
-        String msg = String.format("授权%s, appId=%s, %s", authResult.isSucceeded() ? "成功" : "失败", appId, authResult.toString());
+        String          msg        = String.format("授权%s, appId=%s, %s", authResult.isSucceeded() ? "成功" : "失败", appId, authResult.toString());
         ToastUtils.showToast(msg);
         return authResult;
     }
