@@ -1,6 +1,7 @@
 package com.botian.recognition.activity;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
@@ -175,10 +176,19 @@ public class RetrieveWithAndroidCameraActivityOri extends AppCompatActivity {
         //    }
         //});
 
-        ((TextView) mViewController.getRootView().findViewById(R.id.title))
-                .setText("离线人脸识别" + (getIntent().getIntExtra("checkType", 1) == 1 ? "(上班)" : "(下班)"));
+        TextView tv_title = mViewController.getRootView().findViewById(R.id.title);
+        tv_title.setText("离线人脸识别" + (getIntent().getIntExtra("checkType", 1) == 1 ? "(上班)" : "(下班)"));
         ((TextView) mViewController.getRootView().findViewById(R.id.logTxt)).setText("请靠近凝视3秒确认打卡");
         tv_changeCont = mViewController.getRootView().findViewById(R.id.tv_changeCont);
+        tv_title.setOnClickListener(v -> {
+            //跳转人脸特征值获取
+            step2GetFaceValue();
+        });
+    }
+
+    private void step2GetFaceValue() {
+        Intent intent = new Intent(this, TXLiveFaceCheckActivity.class);
+        startActivity(intent);
     }
 
     public boolean isCanGetFace() {

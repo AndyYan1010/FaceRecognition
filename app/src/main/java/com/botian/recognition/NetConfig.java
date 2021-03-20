@@ -47,4 +47,7 @@ public class NetConfig {
     //获取特征值列表
     public static String FNOTELIST      = MainROOT + "fnotelist";
 
+    //获取密码
+    public static String SEROK = MainROOT + "serok";
+
 }

@@ -54,6 +54,11 @@ android {
         daoPackage 'com.btface.greendaodemo'
         targetGenDir 'src/main/java'
     }
+
+    lintOptions {
+        checkReleaseBuilds false
+        abortOnError false
+    }
 }
 
 dependencies {

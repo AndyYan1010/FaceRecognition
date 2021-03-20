@@ -119,7 +119,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnClickList
                 break;
             case R.id.img_logo:
                 //跳转人脸特征值获取
-                step2GetFaceValue();
+                //step2GetFaceValue();
                 break;
             case R.id.tv_sync:
                 //同步特征值
@@ -186,15 +186,6 @@ public class MainActivity2 extends AppCompatActivity implements View.OnClickList
         }
     }
 
-    private void askRightForSDK() {
-        try {
-            mPermissionHandler.start();// 先申请系统权限
-        } catch (PermissionHandler.GetPermissionsException e) {
-            e.printStackTrace();
-            Toast.makeText(this, "GetPermissionsException: " + e.toString(), Toast.LENGTH_SHORT).show();
-        }
-    }
-
     /***同步人脸特种值*/
     private void syncFaceValue() {
         ProgressDialogUtil.startShow(this, "正在同步人脸特征值信息...");
@@ -256,8 +247,10 @@ public class MainActivity2 extends AppCompatActivity implements View.OnClickList
 
     /***设置红外感应*/
     private void setInfra_redWithLED() {
-        mHandler            = new Handler();
-        mMyInfraredReceiver = new MyInfraredReceiver(mHandler);
+        if (mHandler == null)
+            mHandler = new Handler();
+        if (mMyInfraredReceiver == null)
+            mMyInfraredReceiver = new MyInfraredReceiver(mHandler);
         IntentFilter intentFilter = new IntentFilter(JwsIntents.REQUEST_RESPONSE_IR_STATE_ACTION);
         MyApplication.getJwsManager().jwsRegisterIRListener();
         registerReceiver(mMyInfraredReceiver, intentFilter);
@@ -269,6 +262,8 @@ public class MainActivity2 extends AppCompatActivity implements View.OnClickList
             MyApplication.getJwsManager().jwsUnregisterIRListener();
             unregisterReceiver(mMyInfraredReceiver);
             mMyInfraredReceiver = null;
+            mHandler.removeCallbacksAndMessages(null);
+            mHandler = null;
         }
         MyApplication.getJwsManager().jwsCloseLED();
     }

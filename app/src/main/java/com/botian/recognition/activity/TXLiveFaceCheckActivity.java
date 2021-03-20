@@ -8,6 +8,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,10 +20,12 @@ import com.botian.recognition.MyApplication;
 import com.botian.recognition.NetConfig;
 import com.botian.recognition.R;
 import com.botian.recognition.bean.CheckFaceHistory;
+import com.botian.recognition.bean.CommonBean;
 import com.botian.recognition.bean.PersonListResultBean;
 import com.botian.recognition.bean.UpCheckResultBean;
 import com.botian.recognition.sdksupport.AIThreadPool;
 import com.botian.recognition.utils.NetUtil;
+import com.botian.recognition.utils.PopupOpenHelper;
 import com.botian.recognition.utils.ProgressDialogUtil;
 import com.botian.recognition.utils.ToastUtils;
 import com.botian.recognition.utils.netUtils.OkHttpUtils;
@@ -51,6 +54,7 @@ public class TXLiveFaceCheckActivity extends BaseActivity implements View.OnClic
     //private Spinner                             mPersonSpinner;
     //private SpPersonNameAdapter                 mSpAdapter;
     private List<PersonListResultBean.ListBean> mPersonList;
+    private int                                 stepType = 0;//0相机注册，1照片注册
 
     @Override
     protected int setLayout() {
@@ -91,17 +95,13 @@ public class TXLiveFaceCheckActivity extends BaseActivity implements View.OnClic
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.tv_regist:
-                //if (mPersonList.size() == 0) {
-                //    ToastUtils.showToast("未获取到人员信息，请重新进入页面！");
-                //    return;
-                //}
-                Intent intent = new Intent(TXLiveFaceCheckActivity.this, RegWithAndroidCameraActivity.class);
-                //intent.putExtra("personList", (Serializable) mPersonList);
-                startActivity(intent);
+                //输入密码，跳转人脸注册界面
+                stepType = 0;
+                showPop2InputPass();
                 break;
             case R.id.tv_regist_pic:
-                Intent intentPic = new Intent(TXLiveFaceCheckActivity.this, RegWithFileActivity.class);
-                startActivity(intentPic);
+                stepType = 1;
+                showPop2InputPass();
                 break;
             case R.id.tv_upload:
                 //提交本地打卡信息
@@ -112,6 +112,59 @@ public class TXLiveFaceCheckActivity extends BaseActivity implements View.OnClic
                 upLoadLocalCheckInfo();
                 break;
         }
+    }
+
+    private void showPop2InputPass() {
+        PopupOpenHelper openHelper = new PopupOpenHelper(this, tv_regist, R.layout.popup_input_password);
+        openHelper.openPopupWindow(true, Gravity.CENTER);
+        openHelper.setOnPopupViewClick((popupWindow, inflateView) -> {
+            EditText et_passWord = inflateView.findViewById(R.id.et_passWord);
+            TextView tv_sure     = inflateView.findViewById(R.id.tv_sure);
+            tv_sure.setOnClickListener(v -> {
+                String passWord = String.valueOf(et_passWord.getText());
+                if (null == passWord || "".equals(passWord)) {
+                    ToastUtils.showToast("请输入密码！");
+                    return;
+                }
+                //验证密码正确与否
+                checkPassWordAndRigest(passWord);
+            });
+        });
+    }
+
+    private void checkPassWordAndRigest(String passWord) {
+        ProgressDialogUtil.startShow(this, "正在验证密码...");
+        RequestParamsFM params = new RequestParamsFM();
+        params.put("fname", passWord);
+        OkHttpUtils.getInstance().doGetWithParams(NetConfig.SEROK, params, new OkHttpUtils.HttpCallBack() {
+            @Override
+            public void onError(Request request, IOException e) {
+                ProgressDialogUtil.hideDialog();
+                ToastUtils.showToast("网络错误");
+            }
+
+            @Override
+            public void onSuccess(int code, String resbody) {
+                ProgressDialogUtil.hideDialog();
+                if (code != 200) {
+                    ToastUtils.showToast("网络请求错误，密码验证失败！");
+                    return;
+                }
+                Gson       gson       = new Gson();
+                CommonBean resultBean = gson.fromJson(resbody, CommonBean.class);
+                ToastUtils.showToast(resultBean.getMessage());
+                if ("1".equals(resultBean.getCode())) {
+                    //跳转注册界面
+                    if (1 == stepType) {
+                        Intent intentPic = new Intent(TXLiveFaceCheckActivity.this, RegWithFileActivity.class);
+                        startActivity(intentPic);
+                    } else {
+                        Intent intent = new Intent(TXLiveFaceCheckActivity.this, RegWithAndroidCameraActivity.class);
+                        startActivity(intent);
+                    }
+                }
+            }
+        });
     }
 
     /***提交本地打卡记录到服务器*/
