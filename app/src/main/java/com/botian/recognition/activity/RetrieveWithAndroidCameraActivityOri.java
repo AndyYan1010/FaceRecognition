@@ -167,15 +167,6 @@ public class RetrieveWithAndroidCameraActivityOri extends AppCompatActivity {
         });
         // 显示UI
         setContentView(mViewController.getRootView());
-        // 设置UI按钮
-        //mViewController.addButton("切换相机", new View.OnClickListener() {
-        //    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-        //    @Override
-        //    public void onClick(View v) {
-        //        ((AndroidCameraManager) mCameraManager).switchCamera();//切换相机
-        //    }
-        //});
-
         TextView tv_title = mViewController.getRootView().findViewById(R.id.title);
         tv_title.setText("离线人脸识别" + (getIntent().getIntExtra("checkType", 1) == 1 ? "(上班)" : "(下班)"));
         ((TextView) mViewController.getRootView().findViewById(R.id.logTxt)).setText("请靠近凝视3秒确认打卡");
@@ -184,6 +175,39 @@ public class RetrieveWithAndroidCameraActivityOri extends AppCompatActivity {
             //跳转人脸特征值获取
             step2GetFaceValue();
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (mCameraManager != null) {
+            mCameraManager.resumeCamera();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        if (mCameraManager != null) {
+            mCameraManager.pauseCamera();
+        }
+        if (null != mHandler) {
+            mHandler.removeCallbacksAndMessages(null);
+        }
+        AudioTimeUtil.getInstance().cancelCountDown();
+        super.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (mCameraManager != null) {
+            mCameraManager.destroyCamera();
+        }
+        if (null != mHandler) {
+            mHandler.removeCallbacksAndMessages(null);
+            mHandler = null;
+        }
+        AudioTimeUtil.getInstance().stop();
+        super.onDestroy();
     }
 
     private void step2GetFaceValue() {
@@ -256,26 +280,34 @@ public class RetrieveWithAndroidCameraActivityOri extends AppCompatActivity {
         AudioTimeUtil.getInstance().initData(3).setOnTimeListener(new AudioTimeUtil.TimeListener() {
             @Override
             public void onStart(String cont) {
-                tv_changeCont.setVisibility(View.VISIBLE);
-                tv_changeCont.setText(cont);
+                if (null != tv_changeCont) {
+                    tv_changeCont.setVisibility(View.VISIBLE);
+                    tv_changeCont.setText(cont);
+                }
             }
 
             @Override
             public void onChange(String cont) {
-                tv_changeCont.setVisibility(View.VISIBLE);
-                tv_changeCont.setText(cont);
+                if (null != tv_changeCont) {
+                    tv_changeCont.setVisibility(View.VISIBLE);
+                    tv_changeCont.setText(cont);
+                }
             }
 
             @Override
             public void onCancel() {
-                mHandler.removeCallbacksAndMessages(null);
+                if (mHandler != null) {
+                    mHandler.removeCallbacksAndMessages(null);
+                }
                 canGetFace = true;
-                tv_changeCont.setVisibility(View.INVISIBLE);
+                if (null != tv_changeCont)
+                    tv_changeCont.setVisibility(View.INVISIBLE);
             }
 
             @Override
             public void onFinish() {
-                tv_changeCont.setVisibility(View.INVISIBLE);
+                if (null != tv_changeCont)
+                    tv_changeCont.setVisibility(View.INVISIBLE);
                 submitCheckFaceInfo();
             }
         });
@@ -426,34 +458,6 @@ public class RetrieveWithAndroidCameraActivityOri extends AppCompatActivity {
         protected void onDrawDepthFaces(Collection<FaceDrawView.DrawableFace> drawableFaces, int frameWidth, int frameHeight) {
             /* Android has no Depth Camera API */
         }
-    }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (mCameraManager != null) {
-            mCameraManager.resumeCamera();
-        }
-    }
-
-    @Override
-    protected void onPause() {
-        if (mCameraManager != null) {
-            mCameraManager.pauseCamera();
-        }
-        super.onPause();
-    }
-
-    @Override
-    protected void onDestroy() {
-        if (mCameraManager != null) {
-            mCameraManager.destroyCamera();
-        }
-        if (null != mHandler) {
-            mHandler.removeCallbacksAndMessages(null);
-            mHandler = null;
-        }
-        AudioTimeUtil.getInstance().stop();
-        super.onDestroy();
     }
 }

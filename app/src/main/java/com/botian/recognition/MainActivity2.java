@@ -119,7 +119,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnClickList
                 break;
             case R.id.img_logo:
                 //跳转人脸特征值获取
-                //step2GetFaceValue();
+                step2GetFaceValue();
                 break;
             case R.id.tv_sync:
                 //同步特征值

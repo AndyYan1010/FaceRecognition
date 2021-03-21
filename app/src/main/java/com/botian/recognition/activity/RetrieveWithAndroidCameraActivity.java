@@ -155,6 +155,7 @@ public class RetrieveWithAndroidCameraActivity extends AppCompatActivity {
         if (mCameraManager != null) {
             mCameraManager.pauseCamera();
         }
+        AudioTimeUtil.getInstance().cancelCountDown();
         super.onPause();
     }
 

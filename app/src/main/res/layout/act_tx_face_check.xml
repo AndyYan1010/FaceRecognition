@@ -36,8 +36,8 @@
         android:layout_height="50dp"
         android:layout_marginTop="50dp"
         android:minWidth="100dp"
-        android:visibility="gone"
-        android:spinnerMode="dialog" />
+        android:spinnerMode="dialog"
+        android:visibility="gone" />
 
     <LinearLayout
         android:id="@+id/button_container"
@@ -66,8 +66,9 @@
         android:gravity="center"
         android:text="注册人脸信息（照片版）"
         android:textColor="@color/white"
-        android:textSize="14sp" />
-    
+        android:textSize="14sp"
+        android:visibility="gone" />
+
     <TextView
         android:id="@+id/tv_upload"
         android:layout_width="250dp"
@@ -76,8 +77,8 @@
         android:background="@drawable/bg_round_corner_blue"
         android:gravity="center"
         android:text="上传打卡信息"
-        android:visibility="gone"
         android:textColor="@color/white"
-        android:textSize="14sp" />
+        android:textSize="14sp"
+        android:visibility="gone" />
 </LinearLayout>
 
