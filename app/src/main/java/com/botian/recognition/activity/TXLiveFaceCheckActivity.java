@@ -55,6 +55,8 @@ public class TXLiveFaceCheckActivity extends BaseActivity implements View.OnClic
     //private SpPersonNameAdapter                 mSpAdapter;
     private List<PersonListResultBean.ListBean> mPersonList;
     private int                                 stepType = 0;//0相机注册，1照片注册
+    private String                              mPassWord;
+    private PopupOpenHelper                     openHelper;
 
     @Override
     protected int setLayout() {
@@ -92,16 +94,31 @@ public class TXLiveFaceCheckActivity extends BaseActivity implements View.OnClic
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mPassWord = null;
+    }
+
+    @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.tv_regist:
-                //输入密码，跳转人脸注册界面
-                stepType = 0;
-                showPop2InputPass();
+                if (null == mPassWord || "".equals(mPassWord)) {
+                    stepType = 0;
+                    showPop2InputPass();
+                } else {
+                    Intent intent = new Intent(TXLiveFaceCheckActivity.this, RegWithAndroidCameraActivity.class);
+                    startActivity(intent);
+                }
                 break;
             case R.id.tv_regist_pic:
-                stepType = 1;
-                showPop2InputPass();
+                if (null == mPassWord || "".equals(mPassWord)) {
+                    stepType = 1;
+                    showPop2InputPass();
+                } else {
+                    Intent intentPic = new Intent(TXLiveFaceCheckActivity.this, RegWithFileActivity.class);
+                    startActivity(intentPic);
+                }
                 break;
             case R.id.tv_upload:
                 //提交本地打卡信息
@@ -114,8 +131,9 @@ public class TXLiveFaceCheckActivity extends BaseActivity implements View.OnClic
         }
     }
 
+    /***输入密码，跳转人脸注册界面*/
     private void showPop2InputPass() {
-        PopupOpenHelper openHelper = new PopupOpenHelper(this, tv_regist, R.layout.popup_input_password);
+        openHelper = new PopupOpenHelper(this, tv_regist, R.layout.popup_input_password);
         openHelper.openPopupWindow(true, Gravity.CENTER);
         openHelper.setOnPopupViewClick((popupWindow, inflateView) -> {
             EditText et_passWord = inflateView.findViewById(R.id.et_passWord);
@@ -154,6 +172,7 @@ public class TXLiveFaceCheckActivity extends BaseActivity implements View.OnClic
                 CommonBean resultBean = gson.fromJson(resbody, CommonBean.class);
                 ToastUtils.showToast(resultBean.getMessage());
                 if ("1".equals(resultBean.getCode())) {
+                    mPassWord = passWord;
                     //跳转注册界面
                     if (1 == stepType) {
                         Intent intentPic = new Intent(TXLiveFaceCheckActivity.this, RegWithFileActivity.class);
@@ -162,6 +181,7 @@ public class TXLiveFaceCheckActivity extends BaseActivity implements View.OnClic
                         Intent intent = new Intent(TXLiveFaceCheckActivity.this, RegWithAndroidCameraActivity.class);
                         startActivity(intent);
                     }
+                    openHelper.dismiss();
                 }
             }
         });
