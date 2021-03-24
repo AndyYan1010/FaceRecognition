@@ -301,8 +301,8 @@ public class TXLiveFaceCheckActivity extends BaseActivity implements View.OnClic
             if (isOpenTX) {
                 //请修改人脸识别 SDK 授权信息
                 Auth.AuthResult authResult = auth(TXLiveFaceCheckActivity.this,
-                        "whazsge55"/*修改APPID为实际的值*/,
-                        "a2c0863f3ae943f3ac0603c7d4f2c28d"/*修改SECRET_KEY为实际的值*/);
+                        MyApplication.appID/*修改APPID为实际的值*/,
+                        MyApplication.secretKey/*修改SECRET_KEY为实际的值*/);
                 if (authResult.isSucceeded()) {//授权成功
                     AIThreadPool.instance().init(TXLiveFaceCheckActivity.this);//提前全局初始化, 后续的 Activity 就不必再执行初始化了
                 }

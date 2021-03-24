@@ -300,8 +300,8 @@ public class MainActivity2 extends AppCompatActivity implements View.OnClickList
             //// 请修改人脸识别 SDK 授权信息
             if (isOpenTX) {
                 Auth.AuthResult authResult = auth(MainActivity2.this,
-                        "whazsge55"/*修改APPID为实际的值*/,
-                        "a2c0863f3ae943f3ac0603c7d4f2c28d"/*修改SECRET_KEY为实际的值*/);
+                        MyApplication.appID/*修改APPID为实际的值*/,
+                        MyApplication.secretKey/*修改SECRET_KEY为实际的值*/);
                 if (authResult.isSucceeded()) {//授权成功
                     AIThreadPool.instance().init(MainActivity2.this);//提前全局初始化, 后续的 Activity 就不必再执行初始化了
                 }
