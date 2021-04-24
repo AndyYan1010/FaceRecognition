@@ -2,10 +2,13 @@ package com.botian.recognition.sdksupport;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Message;
 import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -16,6 +19,7 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.PopupWindow;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -27,6 +31,7 @@ import com.botian.recognition.R;
 import com.botian.recognition.activity.RegWithAndroidCameraActivity;
 import com.botian.recognition.adapter.SpPersonNameAdapter;
 import com.botian.recognition.bean.PersonListResultBean;
+import com.botian.recognition.utils.PopupOpenHelper;
 import com.botian.recognition.utils.ToastUtils;
 import com.botian.recognition.utils.netUtils.OkHttpUtils;
 import com.botian.recognition.utils.netUtils.RequestParamsFM;
@@ -47,21 +52,13 @@ public class ShowCheckFaceDialogView {
     private Spinner                             spinnerPerson;
     private EditText                            et_no;
     private TextView                            tv_search;
-    private TextView                            tv_name;
+    private TextView                            mTv_name;
     private List<PersonListResultBean.ListBean> mPersonList;
     private SpPersonNameAdapter                 mSpAdapter;
-    private boolean                             showStatus;
-
-    //public static ShowCheckFaceDialogView getInstance() {
-    //    if (null == faceDialogView) {
-    //        synchronized (ShowCheckFaceDialogView.class) {
-    //            if (null == faceDialogView) {
-    //                faceDialogView = new ShowCheckFaceDialogView();
-    //            }
-    //        }
-    //    }
-    //    return faceDialogView;
-    //}
+    private Bitmap                              mFace;
+    private TextView                            mTv_sure;
+    private Handler                             handler;
+    private int                                 time = 3;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public void initView(Context context) {
@@ -75,13 +72,36 @@ public class ShowCheckFaceDialogView {
         initDialogView();
         initSpinner();
         dialog.setContentView(view);
+        dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialog) {
+                if (null != handler) {
+                    handler.removeCallbacksAndMessages(null);
+                    handler = null;
+                }
+            }
+        });
+        handler = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                super.handleMessage(msg);
+                time--;
+                if (time == 0) {
+                    mTv_sure.setText("确认注册");
+                    handler.removeMessages(0);
+                    return;
+                }
+                mTv_sure.setText("确认注册（" + time + "）");
+                handler.sendEmptyMessageDelayed(0, 1000);
+            }
+        };
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void initDialogView() {
         et_no     = view.findViewById(R.id.et_no);
         tv_search = view.findViewById(R.id.tv_search);
-        tv_name   = view.findViewById(R.id.tv_name);
+        mTv_name  = view.findViewById(R.id.tv_name);
         et_no.setShowSoftInputOnFocus(false);
         setViewListener();
     }
@@ -122,9 +142,8 @@ public class ShowCheckFaceDialogView {
                 if (TextUtils.isEmpty(selectName)) {
                     ToastUtils.showToast("姓名不能为空！");
                 } else {
-                    ((RegWithAndroidCameraActivity) context).setDialogStatue(false);
-                    ((RegWithAndroidCameraActivity) context).setSelectButton(1);
-                    dialog.dismiss();
+                    //先让员工确认是否是本人
+                    showSurePopView();
                 }
             }
         });
@@ -142,6 +161,42 @@ public class ShowCheckFaceDialogView {
                 ((RegWithAndroidCameraActivity) context).setDialogStatue(false);
                 ((RegWithAndroidCameraActivity) context).setSelectButton(0);
                 dialog.dismiss();
+            }
+        });
+    }
+
+    /****显示确认弹框（三秒）*/
+    private void showSurePopView() {
+        PopupOpenHelper popupOpenHelper = new PopupOpenHelper(context, view, R.layout.popup_sure_view);
+        popupOpenHelper.openPopupWindow(true, Gravity.CENTER);
+        popupOpenHelper.setOnPopupViewClick(new PopupOpenHelper.ViewClickListener() {
+            @Override
+            public void onViewListener(PopupWindow popupWindow, View inflateView) {
+                ImageView img_face = inflateView.findViewById(R.id.img_face);
+                TextView  tv_num   = inflateView.findViewById(R.id.tv_num);
+                TextView  tv_name  = inflateView.findViewById(R.id.tv_name);
+                mTv_sure = inflateView.findViewById(R.id.tv_sure);
+                TextView tv_cancel = inflateView.findViewById(R.id.tv_cancel);
+                img_face.setImageBitmap(mFace);
+                tv_num.setText(et_no.getText());
+                tv_name.setText(mTv_name.getText());
+                //三秒倒计时
+                time = 3;
+                mTv_sure.setText("确认注册(3)");
+                handler.sendEmptyMessageDelayed(0, 1000);
+                mTv_sure.setOnClickListener(v -> {
+                    if (time > 0) {
+                        return;
+                    }
+                    popupOpenHelper.dismiss();
+                    //确认注册
+                    ((RegWithAndroidCameraActivity) context).setDialogStatue(false);
+                    ((RegWithAndroidCameraActivity) context).setSelectButton(1);
+                    dialog.dismiss();
+                });
+                tv_cancel.setOnClickListener(v -> {
+                    popupOpenHelper.dismiss();
+                });
             }
         });
     }
@@ -175,7 +230,7 @@ public class ShowCheckFaceDialogView {
                 if (null != resultBean.getList() && resultBean.getList().size() > 0) {
                     selectName = resultBean.getList().get(0).getFname();
                     selectID   = resultBean.getList().get(0).getId();
-                    tv_name.setText(selectName);
+                    mTv_name.setText(selectName);
                     ((RegWithAndroidCameraActivity) context).setSelectName(selectName, selectID);
                 } else {
                     ToastUtils.showToast("网络请求错误，人员姓名查询失败！");
@@ -185,15 +240,9 @@ public class ShowCheckFaceDialogView {
     }
 
     public void setViewCont(Bitmap face, List<PersonListResultBean.ListBean> personList) {
+        mFace = face;
         ((ImageView) view.findViewById(R.id.img)).setImageBitmap(face);
         selectName = "";
-        //if (null == mPersonList) {
-        //    mPersonList = new ArrayList<>();
-        //} else {
-        //    mPersonList.clear();
-        //}
-        //mPersonList.addAll(personList);
-        //mSpAdapter.notifyDataSetChanged();
     }
 
     public void showDialog() {

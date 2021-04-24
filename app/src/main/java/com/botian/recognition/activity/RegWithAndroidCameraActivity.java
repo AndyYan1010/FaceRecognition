@@ -307,7 +307,6 @@ public class RegWithAndroidCameraActivity extends AppCompatActivity {
             @Override
             public void onSuccess(int code, String resbody) {
                 ProgressDialogUtil.hideDialog();
-                System.out.println("提交返回信息：" + resbody);
                 if (code != 200) {
                     ToastUtils.showToast("网络请求错误，人脸特征值提交失败！");
                     isUpDateFace = false;

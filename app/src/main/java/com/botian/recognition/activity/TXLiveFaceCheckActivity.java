@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -51,6 +52,7 @@ public class TXLiveFaceCheckActivity extends BaseActivity implements View.OnClic
     private TextView                            tv_regist;
     private TextView                            tv_regist_pic;
     private TextView                            tv_upload;
+    private ImageView                           img_back;
     //private Spinner                             mPersonSpinner;
     //private SpPersonNameAdapter                 mSpAdapter;
     private List<PersonListResultBean.ListBean> mPersonList;
@@ -69,6 +71,7 @@ public class TXLiveFaceCheckActivity extends BaseActivity implements View.OnClic
         tv_regist     = findViewById(R.id.tv_regist);
         tv_regist_pic = findViewById(R.id.tv_regist_pic);
         tv_upload     = findViewById(R.id.tv_upload);
+        img_back      = findViewById(R.id.img_back);
     }
 
     @Override
@@ -88,6 +91,7 @@ public class TXLiveFaceCheckActivity extends BaseActivity implements View.OnClic
 
     @Override
     protected void initListener() {
+        img_back.setOnClickListener(this);
         tv_regist.setOnClickListener(this);
         tv_regist_pic.setOnClickListener(this);
         tv_upload.setOnClickListener(this);
@@ -102,6 +106,9 @@ public class TXLiveFaceCheckActivity extends BaseActivity implements View.OnClic
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
+            case R.id.img_back:
+                finish();
+                break;
             case R.id.tv_regist:
                 if (null == mPassWord || "".equals(mPassWord)) {
                     stepType = 0;
