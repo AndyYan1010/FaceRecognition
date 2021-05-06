@@ -26,6 +26,7 @@ import com.botian.recognition.activity.WebUrlActivity;
 import com.botian.recognition.adapter.LiensAdapter;
 import com.botian.recognition.bean.ClassLinesBean;
 import com.botian.recognition.bean.CommonBean;
+import com.botian.recognition.utils.PhoneInfoUtil;
 import com.botian.recognition.utils.PopupOpenHelper;
 import com.botian.recognition.utils.ProgressDialogUtil;
 import com.botian.recognition.utils.ToastDialogUtil;
@@ -298,11 +299,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @SuppressLint({"CheckResult", "MissingPermission"})
     private void getDevInfo() {
         new RxPermissions(this)
-                .request(Manifest.permission.READ_PHONE_STATE)
+                .request(Manifest.permission.ACCESS_NETWORK_STATE)
                 .subscribe(granted -> {
                     if (granted) {
                         //MyApplication.devID = PhoneInfoUtil.getTelephonyManager().getDeviceId();
-                        MyApplication.devID = "869066035238777";
+                        MyApplication.devID = PhoneInfoUtil.getTelMacAddress().replace(":", "");
+                        //MyApplication.devID = "869066035238777";
                         tv_DevID.setText("设备ID：" + MyApplication.devID);
                         //获取路线
                         getClassLines();

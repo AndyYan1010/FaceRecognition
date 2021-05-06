@@ -6,7 +6,8 @@ package com.botian.recognition;
  * @author zww
  */
 public class NetConfig {
-    public static String MainROOT     = "http://111.231.134.126:8082/haianJK/";
+    //public static String MainROOT     = "http://111.231.134.126:8082/haianJK/";
+    public static String MainROOT     = "http://10.0.0.11:42007/haianJK/";
     //人脸搜索
     public static String SEARCHFACE   = MainROOT + "searchFace";
     //获取班线列表

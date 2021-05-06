@@ -194,14 +194,15 @@ public class MainWebViewActivity extends AppCompatActivity {
     @SuppressLint({"CheckResult", "MissingPermission"})
     private void getDevInfo() {
         new RxPermissions(this)
-                .request(Manifest.permission.READ_PHONE_STATE)
+                .request(Manifest.permission.ACCESS_NETWORK_STATE)
                 .subscribe(granted -> {
                     if (granted) {
-                        MyApplication.devID = PhoneInfoUtil.getTelephonyManager().getDeviceId();
-                        MyApplication.devID = "869066035238777";
+                        MyApplication.devID = PhoneInfoUtil.getTelMacAddress().replace(":", "");
+                        //MyApplication.devID = "869066035238777";
                         tv_DevID.setText("设备ID：" + MyApplication.devID);
-                        //webview加载网页地址
-                        web_url.loadUrl("http://81.68.102.112:8088/h5?devID=" + MyApplication.devID);
+                        //webview加载网页地址.
+                        //web_url.loadUrl("http://81.68.102.112:8088/h5?devID=" + MyApplication.devID);
+                        web_url.loadUrl("http://10.0.0.11:42007/haianWeb?devID=" + MyApplication.devID);
                     } else {
                         //未开启定位权限或者被拒绝的操作
                         ToastDialogUtil.getInstance()

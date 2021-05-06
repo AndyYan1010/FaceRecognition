@@ -320,10 +320,11 @@ public class MainActivity2 extends AppCompatActivity implements View.OnClickList
     @SuppressLint({"CheckResult", "MissingPermission"})
     private void getDevInfo() {
         new RxPermissions(this)
-                .request(Manifest.permission.READ_PHONE_STATE)
+                .request(Manifest.permission.ACCESS_NETWORK_STATE)
                 .subscribe(granted -> {
                     if (granted) {
-                        MyApplication.devID = PhoneInfoUtil.getTelephonyManager().getDeviceId();
+                        //MyApplication.devID = PhoneInfoUtil.getTelephonyManager().getDeviceId();
+                        MyApplication.devID = PhoneInfoUtil.getTelMacAddress().replace(":", "");
                         tv_DevID.setText("设备ID：" + MyApplication.devID);
                         //申请权限
                         askForRight();
