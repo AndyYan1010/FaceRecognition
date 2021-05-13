@@ -16,11 +16,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
-import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -29,7 +27,6 @@ import androidx.annotation.RequiresApi;
 import com.botian.recognition.NetConfig;
 import com.botian.recognition.R;
 import com.botian.recognition.activity.RegWithAndroidCameraActivity;
-import com.botian.recognition.adapter.SpPersonNameAdapter;
 import com.botian.recognition.bean.PersonListResultBean;
 import com.botian.recognition.utils.PopupOpenHelper;
 import com.botian.recognition.utils.ToastUtils;
@@ -38,27 +35,23 @@ import com.botian.recognition.utils.netUtils.RequestParamsFM;
 import com.google.gson.Gson;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import okhttp3.Request;
 
 public class ShowCheckFaceDialogView {
-    private MyDialog                            dialog;
-    private View                                view;
-    private Context                             context;
-    private String                              selectName;
-    private String                              selectID;
-    private Spinner                             spinnerPerson;
-    private EditText                            et_no;
-    private TextView                            tv_search;
-    private TextView                            mTv_name;
-    private List<PersonListResultBean.ListBean> mPersonList;
-    private SpPersonNameAdapter                 mSpAdapter;
-    private Bitmap                              mFace;
-    private TextView                            mTv_sure;
-    private Handler                             handler;
-    private int                                 time = 3;
+    private MyDialog         dialog;
+    private View             view;
+    private Context          context;
+    private String           selectName;
+    private String           selectID;
+    private EditText         et_no;
+    private TextView         tv_search;
+    private TextView         mTv_name;
+    private Bitmap           mFace;
+    private TextView         mTv_sure;
+    private Handler          handler;
+    private int              time = 3;
+    private OnSelectListener mOnSelectListener;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public void initView(Context context) {
@@ -70,7 +63,6 @@ public class ShowCheckFaceDialogView {
         view = LayoutInflater.from(context).inflate(R.layout.confirm_reg_face, null);
         view.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         initDialogView();
-        initSpinner();
         dialog.setContentView(view);
         dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
             @Override
@@ -106,26 +98,6 @@ public class ShowCheckFaceDialogView {
         setViewListener();
     }
 
-    private void initSpinner() {
-        spinnerPerson = view.findViewById(R.id.spinner_list);
-        mPersonList   = new ArrayList<>();
-        mSpAdapter    = new SpPersonNameAdapter(context, mPersonList);
-        spinnerPerson.setAdapter(mSpAdapter);
-        spinnerPerson.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                selectName = mPersonList.get(position).getFname();
-                selectID   = mPersonList.get(position).getId();
-                ((RegWithAndroidCameraActivity) context).setSelectName(selectName, selectID);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-    }
-
     private void setViewListener() {
         tv_search.setOnClickListener(v -> {
             String etNo = String.valueOf(et_no.getText());
@@ -153,6 +125,8 @@ public class ShowCheckFaceDialogView {
                 ((RegWithAndroidCameraActivity) context).setDialogStatue(false);
                 ((RegWithAndroidCameraActivity) context).setSelectButton(2);
                 dialog.dismiss();
+                if (null != mOnSelectListener)
+                    mOnSelectListener.onSelected(2);
             }
         });
         view.findViewById(R.id.cancel).setOnClickListener(new View.OnClickListener() {
@@ -161,6 +135,8 @@ public class ShowCheckFaceDialogView {
                 ((RegWithAndroidCameraActivity) context).setDialogStatue(false);
                 ((RegWithAndroidCameraActivity) context).setSelectButton(0);
                 dialog.dismiss();
+                if (null != mOnSelectListener)
+                    mOnSelectListener.onSelected(0);
             }
         });
     }
@@ -193,6 +169,8 @@ public class ShowCheckFaceDialogView {
                     ((RegWithAndroidCameraActivity) context).setDialogStatue(false);
                     ((RegWithAndroidCameraActivity) context).setSelectButton(1);
                     dialog.dismiss();
+                    if (null != mOnSelectListener)
+                        mOnSelectListener.onSelected(1);
                 });
                 tv_cancel.setOnClickListener(v -> {
                     popupOpenHelper.dismiss();
@@ -239,7 +217,7 @@ public class ShowCheckFaceDialogView {
         });
     }
 
-    public void setViewCont(Bitmap face, List<PersonListResultBean.ListBean> personList) {
+    public void setViewCont(Bitmap face) {
         mFace = face;
         ((ImageView) view.findViewById(R.id.img)).setImageBitmap(face);
         selectName = "";
@@ -271,5 +249,13 @@ public class ShowCheckFaceDialogView {
             getWindow().getAttributes().dimAmount = 0.8f;
             super.show();
         }
+    }
+
+    public void setOnSelectListener(OnSelectListener onSelectListener) {
+        mOnSelectListener = onSelectListener;
+    }
+
+    public interface OnSelectListener {
+        void onSelected(int selectType);
     }
 }

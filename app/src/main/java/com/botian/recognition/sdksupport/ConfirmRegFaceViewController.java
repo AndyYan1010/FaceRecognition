@@ -17,26 +17,19 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.AdapterView;
 import android.widget.ImageView;
-import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
 import com.botian.recognition.MyApplication;
 import com.botian.recognition.R;
-import com.botian.recognition.adapter.SpPersonNameAdapter;
-import com.botian.recognition.bean.PersonListResultBean;
 
-import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 public class ConfirmRegFaceViewController {
-    private List<PersonListResultBean.ListBean> mPersonList;
 
-    public ConfirmRegFaceViewController(List<PersonListResultBean.ListBean> personList) {
-        mPersonList = personList;
+    public ConfirmRegFaceViewController() {
     }
 
     /**
@@ -53,11 +46,6 @@ public class ConfirmRegFaceViewController {
                 final View view = LayoutInflater.from(context).inflate(R.layout.confirm_reg_face, null);
                 view.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
                 ((ImageView) view.findViewById(R.id.img)).setImageBitmap(face);
-                //final EditText nameText = (EditText) view.findViewById(R.id.name);
-                Spinner spinnerPerson = view.findViewById(R.id.spinner_list);
-                initSpinnerView(context, spinnerPerson);
-                //nameText.setText(name);
-                //nameText.clearFocus();
                 view.findViewById(R.id.reg).setOnClickListener(new OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -107,23 +95,6 @@ public class ConfirmRegFaceViewController {
             e.printStackTrace();
         }
         return result;
-    }
-
-    private void initSpinnerView(Context context, Spinner spinnerPerson) {
-        SpPersonNameAdapter mSpAdapter = new SpPersonNameAdapter(context, mPersonList);
-        spinnerPerson.setAdapter(mSpAdapter);
-        spinnerPerson.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                MyApplication.tempUserID   = mPersonList.get(position).getId();
-                MyApplication.tempUserName = mPersonList.get(position).getFname();
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
     }
 
     public static class ConfirmResult {

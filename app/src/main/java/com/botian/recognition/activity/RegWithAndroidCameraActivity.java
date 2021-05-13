@@ -3,6 +3,7 @@ package com.botian.recognition.activity;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 
 import androidx.annotation.RequiresApi;
@@ -10,13 +11,13 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.botian.recognition.NetConfig;
 import com.botian.recognition.bean.CommonBean;
-import com.botian.recognition.bean.PersonListResultBean;
 import com.botian.recognition.sdksupport.AIThreadPool;
 import com.botian.recognition.sdksupport.AbsActivityViewController;
 import com.botian.recognition.sdksupport.AlignmentStep;
 import com.botian.recognition.sdksupport.AndroidCameraManager;
 import com.botian.recognition.sdksupport.AsyncJobBuilder;
 import com.botian.recognition.sdksupport.ConfirmRegFaceStep;
+import com.botian.recognition.sdksupport.ConfirmRegFaceViewController;
 import com.botian.recognition.sdksupport.ExtractFeatureStep;
 import com.botian.recognition.sdksupport.FaceDrawView;
 import com.botian.recognition.sdksupport.FaceForConfirm;
@@ -34,7 +35,6 @@ import com.botian.recognition.utils.ProgressDialogUtil;
 import com.botian.recognition.utils.ToastUtils;
 import com.botian.recognition.utils.netUtils.OkHttpUtils;
 import com.botian.recognition.utils.netUtils.RequestParamsFM;
-import com.botian.recognition.utils.netUtils.ThreadUtils;
 import com.google.android.cameraview.CameraView;
 import com.google.gson.Gson;
 import com.tencent.cloud.ai.fr.camera.Frame;
@@ -50,21 +50,20 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.CountDownLatch;
 
 import okhttp3.Request;
 
 public class RegWithAndroidCameraActivity extends AppCompatActivity {
-    private ICameraManager                      mCameraManager;
-    private AbsActivityViewController           mViewController;
-    private List<PersonListResultBean.ListBean> mPersonList;
-    public  boolean                             isShowDialog = false;//
-    public  int                                 selectButton = -1;//
-    public  String                              selectName   = "";//
-    public  String                              selectID     = "";//
-    private boolean                             isUpDateFace = false;
+    private ICameraManager            mCameraManager;
+    private AbsActivityViewController mViewController;
+    public  boolean                   isShowDialog = false;//
+    public  int                       selectButton = -1;//
+    public  String                    selectName   = "";//
+    public  String                    selectID     = "";//
+    private boolean                   isUpDateFace = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -164,7 +163,7 @@ public class RegWithAndroidCameraActivity extends AppCompatActivity {
                 @Override
                 protected boolean onConfirmFace(FaceForConfirm faceForConfirm) {
                     //等待用户操作 UI 
-                    //ConfirmRegFaceViewController.ConfirmResult result = new ConfirmRegFaceViewController(mPersonList)
+                    //ConfirmRegFaceViewController.ConfirmResult result = new ConfirmRegFaceViewController()
                     //        .waitConfirm(RegWithAndroidCameraActivity.this, faceForConfirm.faceBmp, faceForConfirm.name);
                     //if (result.code == ConfirmRegFaceViewController.ConfirmResult.RESULT_OK) {
                     //    faceForConfirm.name = result.name;
@@ -173,28 +172,73 @@ public class RegWithAndroidCameraActivity extends AppCompatActivity {
                     //if (result.code == ConfirmRegFaceViewController.ConfirmResult.RESULT_CANCEL) {
                     //    RegWithAndroidCameraActivity.this.finish();
                     //}
-                    ThreadUtils.runOnMainThread(new Runnable() {
+                    if (isUpDateFace) {
+                        return false;
+                    }
+                    CountDownLatch                             countDownLatch = new CountDownLatch(1);
+                    ConfirmRegFaceViewController.ConfirmResult result         = new ConfirmRegFaceViewController.ConfirmResult();
+                    new Handler().post(new Runnable() {
                         @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
                         @Override
                         public void run() {
-                            ShowCheckFaceDialogView faceDialogView = null;
-                            if (!isShowDialog && selectButton != 0 && !isUpDateFace) {
-                                faceDialogView = new ShowCheckFaceDialogView();
-                                faceDialogView.initView(RegWithAndroidCameraActivity.this);
-                                faceDialogView.setViewCont(faceForConfirm.faceBmp, mPersonList);
+                            ShowCheckFaceDialogView faceDialogView = new ShowCheckFaceDialogView();
+                            faceDialogView.initView(RegWithAndroidCameraActivity.this);
+                            faceDialogView.setViewCont(faceForConfirm.faceBmp);
+                            faceDialogView.setOnSelectListener(new ShowCheckFaceDialogView.OnSelectListener() {
+                                @Override
+                                public void onSelected(int selectType) {
+                                    if (selectType == 1) {
+                                        result.setCode(ConfirmRegFaceViewController.ConfirmResult.RESULT_OK);
+                                    } else if (selectType == 2) {
+                                        result.setCode(ConfirmRegFaceViewController.ConfirmResult.RESULT_NEXT);
+                                    } else {
+                                        result.setCode(ConfirmRegFaceViewController.ConfirmResult.RESULT_CANCEL);
+                                    }
+                                    countDownLatch.countDown();
+                                }
+                            });
+                            try {
                                 faceDialogView.showDialog();
+                            } catch (Exception e) {
+                                ToastUtils.showToast("请退出重试！");
                             }
                         }
                     });
-                    if (selectButton == 1) {
+                    try {
+                        countDownLatch.await();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    if (result.code == ConfirmRegFaceViewController.ConfirmResult.RESULT_OK) {
                         faceForConfirm.name = selectID;
                         isUpDateFace        = true;
                         return true;// true: 确认注册此人脸
                     }
-                    if (selectButton == 0) {
+                    if (result.code == ConfirmRegFaceViewController.ConfirmResult.RESULT_CANCEL) {
                         finish();
-                        //RegWithAndroidCameraActivity.this.finish();
                     }
+
+                    //ThreadUtils.runOnMainThread(new Runnable() {
+                    //    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+                    //    @Override
+                    //    public void run() {
+                    //        ShowCheckFaceDialogView faceDialogView = null;
+                    //        if (!isShowDialog && selectButton != 0 && !isUpDateFace) {
+                    //            faceDialogView = new ShowCheckFaceDialogView();
+                    //            faceDialogView.initView(RegWithAndroidCameraActivity.this);
+                    //            faceDialogView.setViewCont(faceForConfirm.faceBmp,countDownLatch);
+                    //            faceDialogView.showDialog();
+                    //        }
+                    //    }
+                    //});
+                    //if (selectButton == 1) {
+                    //    faceForConfirm.name = selectID;
+                    //    isUpDateFace        = true;
+                    //    return true;// true: 确认注册此人脸
+                    //}
+                    //if (selectButton == 0) {
+                    //    finish();
+                    //}
                     return false;
                 }
             })
