@@ -64,6 +64,7 @@ public class RegWithAndroidCameraActivity extends AppCompatActivity {
     public  String                    selectName   = "";//
     public  String                    selectID     = "";//
     private boolean                   isUpDateFace = false;
+    private Handler                   mFaceHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -177,7 +178,8 @@ public class RegWithAndroidCameraActivity extends AppCompatActivity {
                     }
                     CountDownLatch                             countDownLatch = new CountDownLatch(1);
                     ConfirmRegFaceViewController.ConfirmResult result         = new ConfirmRegFaceViewController.ConfirmResult();
-                    new Handler().post(new Runnable() {
+                    mFaceHandler = new Handler();
+                    mFaceHandler.post(new Runnable() {
                         @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
                         @Override
                         public void run() {
@@ -287,6 +289,9 @@ public class RegWithAndroidCameraActivity extends AppCompatActivity {
     protected void onDestroy() {
         if (mCameraManager != null) {
             mCameraManager.destroyCamera();
+        }
+        if (mFaceHandler != null) {
+            mFaceHandler = null;
         }
         super.onDestroy();
     }
