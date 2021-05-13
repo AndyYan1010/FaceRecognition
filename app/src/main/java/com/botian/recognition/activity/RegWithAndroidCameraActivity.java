@@ -360,6 +360,7 @@ public class RegWithAndroidCameraActivity extends AppCompatActivity {
                 CommonBean commonBean = gson.fromJson(resbody, CommonBean.class);
                 ToastUtils.showToast(commonBean.getMessage());
                 if (!"1".equals(commonBean.getCode())) {
+                    isUpDateFace = false;
                     return;
                 }
                 finish();
