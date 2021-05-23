@@ -99,6 +99,16 @@ public class MainActivity2 extends AppCompatActivity implements View.OnClickList
         SyncFaceValueUtil.startSyncValue(this);
         //打开（或关闭）红外感应
         changeLEDListener();
+        //自动跳转人脸界面
+        boolean isAutoFaceAct = getIntent().getBooleanExtra("isAutoFaceAct", false);
+        int     stepWorkType  = getIntent().getIntExtra("stepWorkType", -1);
+        if (isAutoFaceAct) {
+            if (stepWorkType == 2) {
+                tv_offWork.performLongClick();
+            } else {
+                tv_toWork.performLongClick();
+            }
+        }
     }
 
     public void initListener() {
