@@ -10,6 +10,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.botian.recognition.MyApplication;
 import com.botian.recognition.NetConfig;
 import com.botian.recognition.R;
 import com.botian.recognition.bean.UpCheckResultBean;
@@ -32,9 +33,11 @@ import com.botian.recognition.utils.AudioTimeUtil;
 import com.botian.recognition.utils.ProgressDialogUtil;
 import com.botian.recognition.utils.TimeUtil;
 import com.botian.recognition.utils.ToastUtils;
+import com.botian.recognition.utils.UpdateWorkInfoUtil;
 import com.botian.recognition.utils.fileUtils.AudioUtil;
 import com.botian.recognition.utils.fileUtils.FileUtil;
 import com.botian.recognition.utils.mediaUtils.SoundMediaPlayerUtil;
+import com.botian.recognition.utils.mediaUtils.SoundUtil;
 import com.botian.recognition.utils.netUtils.OkHttpUtils;
 import com.botian.recognition.utils.netUtils.RequestParamsFM;
 import com.botian.recognition.utils.netUtils.ThreadUtils;
@@ -336,7 +339,6 @@ public class RetrieveWithAndroidCameraActivityOri extends AppCompatActivity {
                     jsonObject.put("ftime", TimeUtil.getNowDateAndTimeStr());
                     peoplelist.put(jsonObject);
                 } catch (Exception e) {
-                    System.out.println(e);
                 }
             }
         }
@@ -355,10 +357,12 @@ public class RetrieveWithAndroidCameraActivityOri extends AppCompatActivity {
             @Override
             public void onError(Request request, IOException e) {
                 ProgressDialogUtil.hideDialog();
-                ToastUtils.showToast("网络连接错误，打卡记录提交失败！");
+                //ToastUtils.showToast("网络连接错误，打卡记录提交失败！");
                 isSubmitting = false;
                 canGetFace   = true;
                 mPersonDataList.clear();
+                //保存打卡信息到本地
+                keepWorkInfo(peoplelist);
             }
 
             @Override
@@ -368,7 +372,9 @@ public class RetrieveWithAndroidCameraActivityOri extends AppCompatActivity {
                 if (code != 200) {
                     isSubmitting = false;
                     canGetFace   = true;
-                    ToastUtils.showToast("网络请求错误，打卡记录提交失败！");
+                    //ToastUtils.showToast("网络请求错误，打卡记录提交失败！");
+                    //保存打卡信息到本地
+                    keepWorkInfo(peoplelist);
                     return;
                 }
                 Gson              gson       = new Gson();
@@ -378,9 +384,33 @@ public class RetrieveWithAndroidCameraActivityOri extends AppCompatActivity {
                 tv_changeCont.setText(resultBean.getMessage());
                 if ("1".equals(resultBean.getCode())) {
                     //清除本地记录
+                    //播报语音
+                    playAudio(resultBean.getAudio());
+                } else {
+                    //保存打卡信息到本地
+                    keepWorkInfo(peoplelist);
                 }
-                //播报语音
-                playAudio(resultBean.getAudio());
+            }
+        });
+    }
+
+    /****保存打卡信息到本地*/
+    private void keepWorkInfo(JSONArray peoplelist) {
+        ProgressDialogUtil.startShow(this, "正在保存打卡信息");
+        MyApplication.isKeepWorkInfo = true;
+        UpdateWorkInfoUtil.getInstance().keepCheckHistory(peoplelist, new UpdateWorkInfoUtil.OnKeepWorkInfoListener() {
+            @Override
+            public void onKeepSuccess() {
+                MyApplication.isKeepWorkInfo = false;
+                ToastUtils.showToast("打卡记录保存成功！");
+                SoundUtil.getInstance().playSrcAudio(R.raw.success);
+            }
+
+            @Override
+            public void onFail() {
+                MyApplication.isKeepWorkInfo = false;
+                ToastUtils.showToast("网络错误，打卡记录保存失败！");
+                SoundUtil.getInstance().playSrcAudio(R.raw.fail);
             }
         });
     }

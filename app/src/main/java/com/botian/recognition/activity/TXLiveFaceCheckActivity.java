@@ -359,23 +359,4 @@ public class TXLiveFaceCheckActivity extends BaseActivity implements View.OnClic
     private void showMessage(final String msg) {
         ((TextView) findViewById(R.id.tips)).setText(msg);
     }
-
-    private void initSpinnerView() {
-        //mPersonList = new ArrayList<>();
-        //mSpAdapter  = new SpPersonNameAdapter(this, mPersonList);
-        //mPersonSpinner.setAdapter(mSpAdapter);
-        //mPersonSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-        //    @Override
-        //    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        //        MyApplication.tempUserID   = mPersonList.get(position).getId();
-        //        MyApplication.tempUserName = mPersonList.get(position).getFname();
-        //        System.out.println(MyApplication.tempUserName);
-        //    }
-        //
-        //    @Override
-        //    public void onNothingSelected(AdapterView<?> parent) {
-        //
-        //    }
-        //});
-    }
 }

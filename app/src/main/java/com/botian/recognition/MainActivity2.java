@@ -24,11 +24,13 @@ import com.botian.recognition.activity.TXLiveFaceCheckActivity;
 import com.botian.recognition.bean.FnoteListBean;
 import com.botian.recognition.sdksupport.AIThreadPool;
 import com.botian.recognition.utils.CommonUtil;
+import com.botian.recognition.utils.NetUtil;
 import com.botian.recognition.utils.PhoneInfoUtil;
 import com.botian.recognition.utils.ProgressDialogUtil;
 import com.botian.recognition.utils.SyncFaceValueUtil;
 import com.botian.recognition.utils.ToastDialogUtil;
 import com.botian.recognition.utils.ToastUtils;
+import com.botian.recognition.utils.UpdateWorkInfoUtil;
 import com.botian.recognition.utils.devUtils.MyInfraredReceiver;
 import com.botian.recognition.utils.imageUtils.ShapeUtil;
 import com.botian.recognition.utils.netUtils.OkHttpUtils;
@@ -109,6 +111,19 @@ public class MainActivity2 extends AppCompatActivity implements View.OnClickList
                 tv_toWork.performLongClick();
             }
         }
+        //自动开始上传打卡信息
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                //判断当前是否有网络，且是否正在上传打卡信息
+                if (!MyApplication.isSubFaceInfo && NetUtil.isNetworkConnected(MainActivity2.this)) {
+                    UpdateWorkInfoUtil.getInstance().sendWorkInfo();
+                }
+                if (mHandler != null) {
+                    mHandler.postDelayed(this, 1000 * 60 * 30);
+                }
+            }
+        });
     }
 
     public void initListener() {

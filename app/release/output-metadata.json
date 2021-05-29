@@ -4,7 +4,7 @@
     "type": "APK",
     "kind": "Directory"
   },
-  "applicationId": "com.botian.recognition",
+  "applicationId": "com.botian.recognition.tv",
   "variantName": "release",
   "elements": [
     {
