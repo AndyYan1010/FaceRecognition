@@ -116,7 +116,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnClickList
             @Override
             public void run() {
                 //判断当前是否有网络，且是否正在上传打卡信息
-                if (!MyApplication.isSubFaceInfo && NetUtil.isNetworkConnected(MainActivity2.this)) {
+                if (!MyApplication.isKeepWorkInfo && NetUtil.isNetworkConnected(MainActivity2.this)) {
                     UpdateWorkInfoUtil.getInstance().sendWorkInfo();
                 }
                 if (mHandler != null) {
