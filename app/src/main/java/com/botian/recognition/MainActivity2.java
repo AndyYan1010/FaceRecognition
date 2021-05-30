@@ -76,6 +76,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnClickList
     private Unbinder unBinder;
     private int      REQUEST_CODE_GET_FACE = 10001;
     private Handler  mHandler;
+    private Handler  mHandlerWorkInfo;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -112,15 +113,16 @@ public class MainActivity2 extends AppCompatActivity implements View.OnClickList
             }
         }
         //自动开始上传打卡信息
-        mHandler.post(new Runnable() {
+        mHandlerWorkInfo = new Handler();
+        mHandlerWorkInfo.post(new Runnable() {
             @Override
             public void run() {
                 //判断当前是否有网络，且是否正在上传打卡信息
                 if (!MyApplication.isKeepWorkInfo && NetUtil.isNetworkConnected(MainActivity2.this)) {
                     UpdateWorkInfoUtil.getInstance().sendWorkInfo();
                 }
-                if (mHandler != null) {
-                    mHandler.postDelayed(this, 1000 * 60 * 30);
+                if (mHandlerWorkInfo != null) {
+                    mHandlerWorkInfo.postDelayed(this, 1000 * 60 * 30);
                 }
             }
         });
@@ -182,6 +184,10 @@ public class MainActivity2 extends AppCompatActivity implements View.OnClickList
         if (null != mHandler) {
             mHandler.removeCallbacksAndMessages(null);
             mHandler = null;
+        }
+        if (null != mHandlerWorkInfo) {
+            mHandlerWorkInfo.removeCallbacksAndMessages(null);
+            mHandlerWorkInfo = null;
         }
         MyApplication.listActivity.remove(this);
     }

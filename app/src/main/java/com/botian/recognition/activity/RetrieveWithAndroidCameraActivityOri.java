@@ -280,7 +280,7 @@ public class RetrieveWithAndroidCameraActivityOri extends AppCompatActivity {
 
     /***倒计时3秒，抓拍人脸*/
     private void checkFaceWaiteForThreeSecond() {
-        AudioTimeUtil.getInstance().initData(3).setOnTimeListener(new AudioTimeUtil.TimeListener() {
+        AudioTimeUtil.getInstance().initData(5).setOnTimeListener(new AudioTimeUtil.TimeListener() {
             @Override
             public void onStart(String cont) {
                 if (null != tv_changeCont) {
@@ -358,8 +358,8 @@ public class RetrieveWithAndroidCameraActivityOri extends AppCompatActivity {
             public void onError(Request request, IOException e) {
                 ProgressDialogUtil.hideDialog();
                 //ToastUtils.showToast("网络连接错误，打卡记录提交失败！");
-                isSubmitting = false;
-                canGetFace   = true;
+                //isSubmitting = false;
+                //canGetFace   = true;
                 mPersonDataList.clear();
                 //保存打卡信息到本地
                 keepWorkInfo(peoplelist);
@@ -370,8 +370,8 @@ public class RetrieveWithAndroidCameraActivityOri extends AppCompatActivity {
                 ProgressDialogUtil.hideDialog();
                 mPersonDataList.clear();
                 if (code != 200) {
-                    isSubmitting = false;
-                    canGetFace   = true;
+                    //isSubmitting = false;
+                    //canGetFace   = true;
                     //ToastUtils.showToast("网络请求错误，打卡记录提交失败！");
                     //保存打卡信息到本地
                     keepWorkInfo(peoplelist);
@@ -401,6 +401,9 @@ public class RetrieveWithAndroidCameraActivityOri extends AppCompatActivity {
         UpdateWorkInfoUtil.getInstance().keepCheckHistory(peoplelist, new UpdateWorkInfoUtil.OnKeepWorkInfoListener() {
             @Override
             public void onKeepSuccess() {
+                ProgressDialogUtil.hideDialog();
+                isSubmitting = false;
+                canGetFace   = true;
                 MyApplication.isKeepWorkInfo = false;
                 ToastUtils.showToast("打卡记录保存成功！");
                 SoundUtil.getInstance().playSrcAudio(R.raw.success);
@@ -408,6 +411,9 @@ public class RetrieveWithAndroidCameraActivityOri extends AppCompatActivity {
 
             @Override
             public void onFail() {
+                ProgressDialogUtil.hideDialog();
+                isSubmitting = false;
+                canGetFace   = true;
                 MyApplication.isKeepWorkInfo = false;
                 ToastUtils.showToast("网络错误，打卡记录保存失败！");
                 SoundUtil.getInstance().playSrcAudio(R.raw.fail);

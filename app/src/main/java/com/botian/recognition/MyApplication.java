@@ -29,8 +29,10 @@ public class MyApplication extends Application {
     public static int                 flag          = -1;//判断是否被回收
     public static boolean             flagScreen    = true;//是否是竖屏设备
     public static boolean             isOpenTX      = true;//设备是否注册腾讯人脸sdk
-    public static String              appID         = "whazsge55";
-    public static String              secretKey     = "a2c0863f3ae943f3ac0603c7d4f2c28d";
+    //public static String              appID         = "whazsge55";
+    public static String              appID         = "4rilklj6i";
+    //public static String              secretKey     = "a2c0863f3ae943f3ac0603c7d4f2c28d";
+    public static String              secretKey     = "360a0d3ab3f54659a0da0bda9eb21c81";
     public static boolean             isKeepWorkInfo = false;
 
 
