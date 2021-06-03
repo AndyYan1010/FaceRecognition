@@ -1,5 +1,7 @@
 package com.botian.recognition.utils;
 
+import android.util.Log;
+
 import com.botian.recognition.MyApplication;
 import com.botian.recognition.NetConfig;
 import com.botian.recognition.bean.CheckFaceHistory;
@@ -107,6 +109,7 @@ public class UpdateWorkInfoUtil {
         try {
             MyApplication.getDaoSession().deleteAll(CheckFaceHistory.class);
         } catch (Exception e) {
+            Log.d("Clear","清除记录失败");
         }
     }
 
