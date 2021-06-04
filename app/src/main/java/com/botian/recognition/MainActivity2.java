@@ -24,7 +24,6 @@ import com.botian.recognition.activity.TXLiveFaceCheckActivity;
 import com.botian.recognition.bean.FnoteListBean;
 import com.botian.recognition.sdksupport.AIThreadPool;
 import com.botian.recognition.utils.CommonUtil;
-import com.botian.recognition.utils.NetUtil;
 import com.botian.recognition.utils.PhoneInfoUtil;
 import com.botian.recognition.utils.ProgressDialogUtil;
 import com.botian.recognition.utils.SyncFaceValueUtil;
@@ -118,11 +117,11 @@ public class MainActivity2 extends AppCompatActivity implements View.OnClickList
             @Override
             public void run() {
                 //判断当前是否有网络，且是否正在上传打卡信息
-                if (!MyApplication.isKeepWorkInfo && NetUtil.isNetworkConnected(MainActivity2.this)) {
+                if (!MyApplication.isKeepWorkInfo) {//&& NetUtil.isNetworkConnected(MainActivity2.this)
                     UpdateWorkInfoUtil.getInstance().sendWorkInfo();
                 }
                 if (mHandlerWorkInfo != null) {
-                    mHandlerWorkInfo.postDelayed(this, 1000 * 60 * 30);
+                    mHandlerWorkInfo.postDelayed(this, 1000 * 60 * 5);
                 }
             }
         });
