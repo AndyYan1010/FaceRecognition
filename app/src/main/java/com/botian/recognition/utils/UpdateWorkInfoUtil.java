@@ -108,8 +108,10 @@ public class UpdateWorkInfoUtil {
     private void clearLocalCheckHistory() {
         try {
             MyApplication.getDaoSession().deleteAll(CheckFaceHistory.class);
+            //MyApplication.getDaoSession().clear();
+            Log.d("ClearSuc","清除记录成功");
         } catch (Exception e) {
-            Log.d("Clear","清除记录失败");
+            Log.d("ClearFail","清除记录失败");
         }
     }
 
