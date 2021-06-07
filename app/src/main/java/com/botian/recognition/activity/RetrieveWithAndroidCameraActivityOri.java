@@ -280,7 +280,7 @@ public class RetrieveWithAndroidCameraActivityOri extends AppCompatActivity {
 
     /***倒计时3秒，抓拍人脸*/
     private void checkFaceWaiteForThreeSecond() {
-        AudioTimeUtil.getInstance().initData(3).setOnTimeListener(new AudioTimeUtil.TimeListener() {
+        AudioTimeUtil.getInstance().initData(2).setOnTimeListener(new AudioTimeUtil.TimeListener() {
             @Override
             public void onStart(String cont) {
                 if (null != tv_changeCont) {

@@ -157,9 +157,9 @@ public class RegWithAndroidCameraActivity extends AppCompatActivity {
             .addStep(new ConfirmRegFaceStep(new ConfirmRegFaceStep.InputProvider() {//【可选】UI 询问用户是否确认注册当前人脸
                 @Override
                 public Collection<YTFaceTracker.TrackedFace> onGetInput(StuffBox stuffBox) {//筛选出已成功提取特征的人脸
-                    if (!isShowDialog && selectButton != 1) {
-                        mStuffBox = stuffBox;
-                    }
+                    //if (!isShowDialog && selectButton != 1) {
+                    //    mStuffBox = stuffBox;
+                    //}
                     Map<YTFaceTracker.TrackedFace, float[]> faceMap = stuffBox.find(ExtractFeatureStep.OUT_FACE_FEATURES);
                     return faceMap.keySet();
                 }
@@ -253,8 +253,8 @@ public class RegWithAndroidCameraActivity extends AppCompatActivity {
             .addStep(new SaveFeaturesToFileStep(new SaveFeaturesToFileStep.InputProvider() {//【必选】把人脸特征保存到磁盘, 用于下次程序启动时恢复人脸库
                 @Override
                 public Collection<FaceForReg> onGetInput(StuffBox stuffBox) {
-                    Map<YTFaceTracker.TrackedFace, float[]> faceAndFeatures = mStuffBox.find(ExtractFeatureStep.OUT_FACE_FEATURES);
-                    Map<YTFaceTracker.TrackedFace, String>  faceAndNames    = mStuffBox.find(ConfirmRegFaceStep.OUT_CONFIRMED_FACES);
+                    Map<YTFaceTracker.TrackedFace, float[]> faceAndFeatures = stuffBox.find(ExtractFeatureStep.OUT_FACE_FEATURES);
+                    Map<YTFaceTracker.TrackedFace, String>  faceAndNames    = stuffBox.find(ConfirmRegFaceStep.OUT_CONFIRMED_FACES);
                     Collection<FaceForReg>                  out             = new ArrayList<>();
                     for (Entry<YTFaceTracker.TrackedFace, String> faceAndName : faceAndNames.entrySet()) {
                         YTFaceTracker.TrackedFace face    = faceAndName.getKey();//人脸信息

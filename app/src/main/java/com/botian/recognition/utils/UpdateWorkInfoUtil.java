@@ -59,7 +59,7 @@ public class UpdateWorkInfoUtil {
             RequestParamsFM params = new RequestParamsFM();
             params.put("peoplelist", peoplelist);
             params.setUseJsonStreamer(true);
-            OkHttpUtils.getInstance().doPost(NetConfig.UPDATEWORK, params, new OkHttpUtils.HttpCallBack() {
+            OkHttpUtils.getInstance().doPost(NetConfig.UPDATEWORKLXSB, params, new OkHttpUtils.HttpCallBack() {
                 @Override
                 public void onError(Request request, IOException e) {
                     //上传失败
@@ -82,7 +82,7 @@ public class UpdateWorkInfoUtil {
             });
         }
     }
-
+    
     /***是否有打卡记录*/
     private boolean isHasWorkInfo() {
         List<CheckFaceHistory> checkFaceHistories = readLocalCheckHistory();

@@ -6,8 +6,8 @@ package com.botian.recognition;
  * @author zww
  */
 public class NetConfig {
-    public static String MainROOT     = "http://3n348g8245.wicp.vip:42007/haianJK/";
-    //public static String MainROOT     = "http://10.0.0.11:42007/haianJK/";
+    //public static String MainROOT     = "http://3n348g8245.wicp.vip:42007/haianJK/";
+    public static String MainROOT     = "http://10.0.0.11:42007/haianJK/";
     //人脸搜索
     public static String SEARCHFACE   = MainROOT + "searchFace";
     //获取班线列表
@@ -45,6 +45,8 @@ public class NetConfig {
     public static String USERSLIST      = MainROOT + "userslist";
     //提交打卡信息
     public static String UPDATEWORK     = MainROOT + "updatework";
+    //提交打卡记录
+    public static String UPDATEWORKLXSB = MainROOT + "updateworklxsb";
     //获取特征值列表
     public static String FNOTELIST      = MainROOT + "fnotelist";
 

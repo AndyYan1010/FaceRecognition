@@ -121,7 +121,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnClickList
                     UpdateWorkInfoUtil.getInstance().sendWorkInfo();
                 }
                 if (mHandlerWorkInfo != null) {
-                    mHandlerWorkInfo.postDelayed(this, 1000 * 60 * 5);
+                    mHandlerWorkInfo.postDelayed(this, 1000 * 60 * 60);
                 }
             }
         });
