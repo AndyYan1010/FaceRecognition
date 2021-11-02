@@ -45,11 +45,9 @@ public class AudioTimeUtil {
         });
         timer.schedule(new TimerTask() {
             public void run() {
-                if (waitTime != 0) {
-                    waitTime--;
+                if (waitTime > 0) {
                     isCountDown = true;
                     long ss = waitTime % 60;
-                    //System.out.println("还剩" + ss + "秒");
                     ThreadUtils.runOnMainThread(new Runnable() {
                         @Override
                         public void run() {
@@ -57,6 +55,8 @@ public class AudioTimeUtil {
                                 timeListener.onChange("" + ss);
                         }
                     });
+                    waitTime--;
+                    //System.out.println("还剩" + ss + "秒");
                 } else {
                     ThreadUtils.runOnMainThread(new Runnable() {
                         @Override
@@ -103,7 +103,7 @@ public class AudioTimeUtil {
     }
 
     /***关闭*/
-    public void stop(){
+    public void stop() {
         if (null != timer)
             timer.cancel();
         isCountDown = false;

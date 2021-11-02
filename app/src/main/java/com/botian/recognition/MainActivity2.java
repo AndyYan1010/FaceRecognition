@@ -26,7 +26,6 @@ import com.botian.recognition.sdksupport.AIThreadPool;
 import com.botian.recognition.utils.CommonUtil;
 import com.botian.recognition.utils.PhoneInfoUtil;
 import com.botian.recognition.utils.ProgressDialogUtil;
-import com.botian.recognition.utils.SyncFaceValueUtil;
 import com.botian.recognition.utils.ToastDialogUtil;
 import com.botian.recognition.utils.ToastUtils;
 import com.botian.recognition.utils.UpdateWorkInfoUtil;
@@ -43,6 +42,7 @@ import com.tencent.cloud.ai.fr.utils.PermissionHandler;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
 
 import butterknife.BindView;
@@ -76,6 +76,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnClickList
     private int      REQUEST_CODE_GET_FACE = 10001;
     private Handler  mHandler;
     private Handler  mHandlerWorkInfo;
+    private Handler  mHandlerFaaceInfo;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -98,7 +99,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnClickList
         //获取硬件信息
         getDevInfo();
         //开启同步注册信息功能，每天凌晨4点更新
-        SyncFaceValueUtil.startSyncValue(this);
+        //SyncFaceValueUtil.startSyncValue(this);
         //打开（或关闭）红外感应
         changeLEDListener();
         //自动跳转人脸界面
@@ -125,6 +126,14 @@ public class MainActivity2 extends AppCompatActivity implements View.OnClickList
                 }
             }
         });
+        //开启人脸特征值定时任务
+        mHandlerFaaceInfo = new Handler();
+        mHandlerFaaceInfo.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                checkSyncTime();
+            }
+        }, 1000 * 60 * 30);
     }
 
     public void initListener() {
@@ -188,6 +197,10 @@ public class MainActivity2 extends AppCompatActivity implements View.OnClickList
             mHandlerWorkInfo.removeCallbacksAndMessages(null);
             mHandlerWorkInfo = null;
         }
+        if (null != mHandlerFaaceInfo) {
+            mHandlerFaaceInfo.removeCallbacksAndMessages(null);
+            mHandlerFaaceInfo = null;
+        }
         MyApplication.listActivity.remove(this);
     }
 
@@ -219,11 +232,13 @@ public class MainActivity2 extends AppCompatActivity implements View.OnClickList
     /***同步人脸特种值*/
     private void syncFaceValue() {
         ProgressDialogUtil.startShow(this, "正在同步人脸特征值信息...");
+        MyApplication.isSyncFacing = true;
         OkHttpUtils.getInstance().doGet(NetConfig.FNOTELIST, new OkHttpUtils.HttpCallBack() {
             @Override
             public void onError(Request request, IOException e) {
                 ProgressDialogUtil.hideDialog();
                 ToastUtils.showToast("网络错误，同步失败！");
+                MyApplication.isSyncFacing = false;
             }
 
             @Override
@@ -231,6 +246,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnClickList
                 if (code != 200) {
                     ProgressDialogUtil.hideDialog();
                     ToastUtils.showToast("网络请求错误，同步失败！");
+                    MyApplication.isSyncFacing = false;
                     return;
                 }
                 Gson          gson       = new Gson();
@@ -238,6 +254,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnClickList
                 if (!"1".equals(resultBean.getCode())) {
                     ProgressDialogUtil.hideDialog();
                     ToastUtils.showToast("数据请求错误，同步失败！");
+                    MyApplication.isSyncFacing = false;
                     return;
                 }
                 ToastUtils.showToast(resultBean.getMessage());
@@ -252,6 +269,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnClickList
     private void keepStoreFaceValue(List<FnoteListBean.ListBean> list) {
         if (null == list || list.size() == 0) {
             ProgressDialogUtil.hideDialog();
+            MyApplication.isSyncFacing = false;
             return;
         }
         ProgressDialogUtil.startShow(this, "正在存储特征值");
@@ -267,6 +285,8 @@ public class MainActivity2 extends AppCompatActivity implements View.OnClickList
                     public void run() {
                         ProgressDialogUtil.hideDialog();
                         ToastUtils.showToast("特征值存储成功");
+                        MyApplication.isSyncFaceInfo = true;
+                        MyApplication.isSyncFacing   = false;
                     }
                 });
             }
@@ -378,5 +398,23 @@ public class MainActivity2 extends AppCompatActivity implements View.OnClickList
                                 .show();
                     }
                 });
+    }
+
+    private void checkSyncTime() {
+        Calendar  cal         = Calendar.getInstance();// 当前日期
+        int       hour        = cal.get(Calendar.HOUR_OF_DAY);// 获取小时
+        int       minute      = cal.get(Calendar.MINUTE);// 获取分钟
+        int       minuteOfDay = hour * 60 + minute;// 从0:00分开是到目前为止的分钟数
+        final int start       = 3 * 60;// 起始时间 03:00的分钟数
+        final int end         = 5 * 60;// 结束时间 05:00的分钟数
+        if (minuteOfDay >= start && minuteOfDay <= end) {
+            //System.out.println("在外围内");
+            //更新特征值
+            if (!MyApplication.isSyncFaceInfo && !MyApplication.isSyncFacing)
+                syncFaceValue();
+        } else {
+            //System.out.println("在外围外");
+            MyApplication.isSyncFaceInfo = false;
+        }
     }
 }

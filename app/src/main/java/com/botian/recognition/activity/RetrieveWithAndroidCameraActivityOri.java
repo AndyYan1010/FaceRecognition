@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.botian.recognition.MyApplication;
 import com.botian.recognition.NetConfig;
 import com.botian.recognition.R;
+import com.botian.recognition.bean.FnoteListBean;
 import com.botian.recognition.bean.UpCheckResultBean;
 import com.botian.recognition.configure.LocalSetting;
 import com.botian.recognition.sdksupport.AIThreadPool;
@@ -30,6 +31,7 @@ import com.botian.recognition.sdksupport.SaveFeaturesToFileStep;
 import com.botian.recognition.sdksupport.StuffBox;
 import com.botian.recognition.sdksupport.TrackStep;
 import com.botian.recognition.utils.AudioTimeUtil;
+import com.botian.recognition.utils.CommonUtil;
 import com.botian.recognition.utils.ProgressDialogUtil;
 import com.botian.recognition.utils.TimeUtil;
 import com.botian.recognition.utils.ToastUtils;
@@ -47,6 +49,7 @@ import com.tencent.cloud.ai.fr.camera.Frame;
 import com.tencent.cloud.ai.fr.camera.FrameGroup;
 import com.tencent.cloud.ai.fr.camera.ICameraManager;
 import com.tencent.cloud.ai.fr.pipeline.AbsStep;
+import com.tencent.cloud.ai.fr.sdksupport.FloatsFileHelper;
 import com.tencent.youtu.YTFaceRetrieval;
 import com.tencent.youtu.YTFaceTracker;
 
@@ -56,10 +59,13 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
 
 import okhttp3.Request;
+
+import static com.botian.recognition.sdksupport.SaveFeaturesToFileStep.FACE_LIB_PATH;
 
 public class RetrieveWithAndroidCameraActivityOri extends AppCompatActivity {
     private ICameraManager               mCameraManager;
@@ -71,6 +77,7 @@ public class RetrieveWithAndroidCameraActivityOri extends AppCompatActivity {
     private boolean                      isAddPerson  = false;
     private Handler                      mHandler;
     private TextView                     tv_changeCont;
+    private Handler                      mHandlerFaaceInfo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -178,6 +185,14 @@ public class RetrieveWithAndroidCameraActivityOri extends AppCompatActivity {
             //跳转人脸特征值获取
             step2GetFaceValue();
         });
+        //开启人脸特征值定时任务
+        mHandlerFaaceInfo = new Handler();
+        mHandlerFaaceInfo.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                checkSyncTime();
+            }
+        }, 1000 * 60 * 20);
     }
 
     @Override
@@ -208,6 +223,10 @@ public class RetrieveWithAndroidCameraActivityOri extends AppCompatActivity {
         if (null != mHandler) {
             mHandler.removeCallbacksAndMessages(null);
             mHandler = null;
+        }
+        if (null != mHandlerFaaceInfo) {
+            mHandlerFaaceInfo.removeCallbacksAndMessages(null);
+            mHandlerFaaceInfo = null;
         }
         AudioTimeUtil.getInstance().stop();
         super.onDestroy();
@@ -402,8 +421,8 @@ public class RetrieveWithAndroidCameraActivityOri extends AppCompatActivity {
             @Override
             public void onKeepSuccess() {
                 ProgressDialogUtil.hideDialog();
-                isSubmitting = false;
-                canGetFace   = true;
+                isSubmitting                 = false;
+                canGetFace                   = true;
                 MyApplication.isKeepWorkInfo = false;
                 ToastUtils.showToast("打卡记录保存成功！");
                 SoundUtil.getInstance().playSrcAudio(R.raw.success);
@@ -412,8 +431,8 @@ public class RetrieveWithAndroidCameraActivityOri extends AppCompatActivity {
             @Override
             public void onFail() {
                 ProgressDialogUtil.hideDialog();
-                isSubmitting = false;
-                canGetFace   = true;
+                isSubmitting                 = false;
+                canGetFace                   = true;
                 MyApplication.isKeepWorkInfo = false;
                 ToastUtils.showToast("网络错误，打卡记录保存失败！");
                 SoundUtil.getInstance().playSrcAudio(R.raw.fail);
@@ -495,5 +514,87 @@ public class RetrieveWithAndroidCameraActivityOri extends AppCompatActivity {
             /* Android has no Depth Camera API */
         }
 
+    }
+
+    private void checkSyncTime() {
+        Calendar  cal         = Calendar.getInstance();// 当前日期
+        int       hour        = cal.get(Calendar.HOUR_OF_DAY);// 获取小时
+        int       minute      = cal.get(Calendar.MINUTE);// 获取分钟
+        int       minuteOfDay = hour * 60 + minute;// 从0:00分开是到目前为止的分钟数
+        final int start       = 3 * 60;// 起始时间 03:00的分钟数
+        final int end         = 5 * 60;// 结束时间 05:00的分钟数
+        if (minuteOfDay >= start && minuteOfDay <= end) {
+            //System.out.println("在外围内");
+            //更新特征值
+            if (!MyApplication.isSyncFaceInfo && !MyApplication.isSyncFacing)
+                syncFaceValue();
+        } else {
+            //System.out.println("在外围外");
+            MyApplication.isSyncFaceInfo = false;
+        }
+    }
+
+    /***同步人脸特种值*/
+    private void syncFaceValue() {
+        ProgressDialogUtil.startShow(this, "正在同步人脸特征值信息...");
+        MyApplication.isSyncFacing = true;
+        OkHttpUtils.getInstance().doGet(NetConfig.FNOTELIST, new OkHttpUtils.HttpCallBack() {
+            @Override
+            public void onError(Request request, IOException e) {
+                ProgressDialogUtil.hideDialog();
+                ToastUtils.showToast("网络错误，同步失败！");
+                MyApplication.isSyncFacing = false;
+            }
+
+            @Override
+            public void onSuccess(int code, String resbody) {
+                if (code != 200) {
+                    ProgressDialogUtil.hideDialog();
+                    ToastUtils.showToast("网络请求错误，同步失败！");
+                    MyApplication.isSyncFacing = false;
+                    return;
+                }
+                Gson          gson       = new Gson();
+                FnoteListBean resultBean = gson.fromJson(resbody, FnoteListBean.class);
+                if (!"1".equals(resultBean.getCode())) {
+                    ProgressDialogUtil.hideDialog();
+                    ToastUtils.showToast("数据请求错误，同步失败！");
+                    MyApplication.isSyncFacing = false;
+                    return;
+                }
+                ToastUtils.showToast(resultBean.getMessage());
+                //存储人脸特征值
+                keepStoreFaceValue(resultBean.getList());
+            }
+        });
+    }
+
+    /***存储特征值
+     * @param list*/
+    private void keepStoreFaceValue(List<FnoteListBean.ListBean> list) {
+        if (null == list || list.size() == 0) {
+            ProgressDialogUtil.hideDialog();
+            MyApplication.isSyncFacing = false;
+            return;
+        }
+        ProgressDialogUtil.startShow(this, "正在存储特征值");
+        ThreadUtils.runOnSubThread(new Runnable() {
+            @Override
+            public void run() {
+                for (FnoteListBean.ListBean bean : list) {
+                    String  filePath    = new File(FACE_LIB_PATH + bean.getId() + ".feature").getAbsolutePath();
+                    boolean writeResult = FloatsFileHelper.writeFloatsToFile(CommonUtil.getFloatArray(bean.getFnote()), filePath);
+                }
+                ThreadUtils.runOnMainThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        ProgressDialogUtil.hideDialog();
+                        ToastUtils.showToast("特征值存储成功");
+                        MyApplication.isSyncFaceInfo = true;
+                        MyApplication.isSyncFacing   = false;
+                    }
+                });
+            }
+        });
     }
 }
