@@ -100,6 +100,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnClickList
         getDevInfo();
         //开启同步注册信息功能，每天凌晨4点更新
         //SyncFaceValueUtil.startSyncValue(this);
+        syncFaceValue();
         //打开（或关闭）红外感应
         changeLEDListener();
         //自动跳转人脸界面
